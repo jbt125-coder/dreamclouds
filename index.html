@@ -6,9 +6,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Cloud Dreams">
+<meta name="apple-mobile-web-app-title" content="Dream Clouds">
 <meta name="theme-color" content="#07060d">
-<title>Cloud Dreams</title>
+<title>Dream Clouds</title>
 <style>
 html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#07060d;position:fixed;
  touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:rgba(0,0,0,0);overscroll-behavior:none}
@@ -37,6 +37,7 @@ canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
 #intro{position:absolute;z-index:8;left:0;top:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
  background:radial-gradient(ellipse at 50% 45%,rgba(7,6,14,0.35) 0%,rgba(7,6,14,0.78) 75%);color:#f3efff;text-align:center;transition:opacity 1.2s}
 #intro h1{margin:0;font-size:54px;font-weight:normal;line-height:1;text-shadow:0 2px 18px rgba(30,20,80,0.9)}
+#lvLine{margin-top:10px;font-size:18px;color:#ecc768;min-height:22px;opacity:0.9}
 #intro .sub{margin:16px 34px 30px 34px;font-size:19px;line-height:1.35;opacity:0.9;max-width:320px}
 #guide{display:table;margin:0 auto;font-size:17px;line-height:1.25}
 #guide div{display:table-row}
@@ -50,6 +51,13 @@ canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
 #bookIn{padding:20px 18px 40px 18px;padding-top:calc(env(safe-area-inset-top) + 18px);padding-bottom:calc(env(safe-area-inset-bottom) + 30px);max-width:520px;margin:0 auto}
 #book h2{margin:0;font-size:34px;font-weight:normal}
 #bookStat{font-size:17px;opacity:0.8;margin:6px 0 18px 0;line-height:1.35}
+#levels{margin:0 0 16px 0}
+.lvb{display:block;width:100%;box-sizing:border-box;text-align:left;margin:0 0 9px 0;padding:10px 14px;border-radius:16px;font-size:18px;line-height:1.25;
+ color:#f3efff;background:rgba(243,239,255,0.06);border:1px solid rgba(243,239,255,0.22);cursor:pointer}
+.lvb small{display:block;font-size:14px;opacity:0.7;margin-top:2px}
+.lvb.on{border-color:#ecc768;background:rgba(236,199,104,0.12)}
+.lvb.lock{opacity:0.5;cursor:default}
+.lvh{font-size:22px;margin:18px 0 10px 0;color:#ecc768}
 #cards{display:flex;flex-wrap:wrap;justify-content:space-between}
 .card{width:31%;margin-bottom:14px;text-align:center}
 .card canvas{position:static;width:100%;height:auto}
@@ -79,7 +87,8 @@ canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
 <div id="prompt" class="pen"></div>
 
 <div id="intro" class="pen">
- <h1>Cloud Dreams</h1>
+ <h1>Dream Clouds</h1>
+ <div id="lvLine"></div>
  <div class="sub">Lie back and watch the sky. Touch it and see what it becomes.</div>
  <div id="guide">
   <div><span class="g">drag</span><span>stir the wind</span></div>
@@ -95,6 +104,7 @@ canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
  <div id="bookIn">
   <h2>Sky journal</h2>
   <div id="bookStat"></div>
+  <div id="levels"></div>
   <div id="cards"></div>
   <button id="closeBook" class="pen">Back to the sky</button>
  </div>
@@ -159,7 +169,7 @@ function breeze(){ return 1.8 + 0.9 * Math.sin(time * 0.013) + 0.35 * Math.sin(t
 
 /* gentle curl-noise sky currents + breeze (separable trig = cheap) */
 function ambient(dt){
-  var t = time * 0.05, x, y, i, bz = breeze(), AMP = 14;
+  var t = time * 0.05, x, y, i, bz = breeze(), AMP = 14 + 8 * vis.vg;
   for (x = 0; x < NX; x++){
     var a = x * 0.09 + t, A = x * 0.153 + t * 1.3;
     colCa[x] = Math.cos(a); colSa[x] = Math.sin(a); colCA[x] = Math.cos(A); colSA[x] = Math.sin(A);
@@ -184,7 +194,7 @@ function ambient(dt){
 
 /* vorticity confinement = billowy curls */
 function vorticity(dt){
-  var x, y, i, VORT = 5.5;
+  var x, y, i, VORT = 5.5 + 4.5 * vis.vg;
   for (y = 0; y < NY; y++){
     for (x = 0; x < NX; x++){
       i = x + y * NX;
@@ -264,6 +274,19 @@ function project(iters){
   for (x = 0; x < NX; x++){ v[x] = 0; v[x + (NY - 1) * NX] = 0; }
 }
 
+/* van gogh: two great slow whirlpools roll across the sky */
+var vortices = [{ x: 0.28, y: 0.34, s: 1 }, { x: 0.74, y: 0.62, s: -1 }];
+function bigSwirls(dt){
+  var k = vis.vg;
+  if (k < 0.05) return;
+  for (var i = 0; i < vortices.length; i++){
+    var w = vortices[i];
+    w.x += breeze() * 0.55 * dt / NX; if (w.x > 1) w.x -= 1;
+    var gx = w.x * NX, gy = (w.y + 0.08 * Math.sin(time * 0.04 + i * 2)) * VNY;
+    splatSwirl(gx, gy, w.s * 0.21 * k * dt, 7);
+  }
+}
+
 function decay(dt){
   var k, i, tm = 0, f = 1 - 0.011 * dt;
   for (k = 0; k < 4; k++){
@@ -322,8 +345,63 @@ function velAt(gx, gy){ var i = cellIdx(gx, gy); return [u[i], v[i], frz[i]]; }
 /* channels: 0 ultramarine/indigo, 1 violet, 2 turquoise, 3 ochre-gold wash */
 var MIXES = [[1,0.25,0,0],[0.25,1,0,0],[0,0.2,1,0],[0.55,0,0.85,0],[0.7,0.7,0,0],[0.1,0,0.3,1],
              [0.3,0.9,0.45,0],[0.9,0,0.2,0.2],[0,0.6,0.7,0],[0.4,0.3,0,0.6]];
+/* Van Gogh: 0 electric blue, 1 fiery orange, 2 turquoise, 3 chrome yellow (mostly blues, gold swirls, a little fire) */
+var MIXES2 = [[1,0,0.5,0],[0.4,0,1,0],[0,0,1,0.45],[0,0,0.35,1],[0.25,0,0.7,0.55],[0,0.55,0,1],
+              [1,0,0.2,0.12],[0.65,0,0.85,0.15],[0,0.12,0.35,1],[0.9,0,1,0]];
+
+/* ================= levels (each one after a master painter) ================= */
+/* pal: the 4 pigment channels; bg: [dark, light, top tint]; lum: highlight; vg: van gogh brushwork */
+var LEVELS = [
+ { n: 1, name: 'Watercolor Sky', by: 'a dreamy watercolor', need: 0, mixes: MIXES,
+   pal: [[0.15,0.18,0.78],[0.56,0.22,0.80],[0.10,0.66,0.90],[0.74,0.58,0.22]],
+   bg: [[0.028,0.024,0.05],[0.17,0.16,0.21],[0.16,0.07,0.24]], lum: [0.88,0.82,0.99], vg: 0, drift: null,
+   card: ['#2c33c7','#8f38cc','#1aa8e6','#bd9438','#6a2fb0','#2a7fd4'],
+   enter: 'The sky is softening back into watercolor...', arrive: 'Level 1 \u00b7 Watercolor Sky' },
+ { n: 2, name: 'The Starry Sky', by: 'after Vincent van Gogh', need: 8, mixes: MIXES2,
+   pal: [[0.10,0.26,0.86],[0.96,0.50,0.12],[0.36,0.78,0.84],[0.99,0.84,0.28]],
+   bg: [[0.025,0.05,0.17],[0.11,0.21,0.47],[0.03,0.13,0.25]], lum: [1.0,0.96,0.74], vg: 1, drift: [1, 2, 0.03],
+   card: ['#1f3fbf','#f0a43a','#5fc4d6','#f6d24a','#2a58c9','#e8862a'],
+   enter: 'The sky is beginning to dream like Vincent van Gogh...', arrive: 'Level 2 \u00b7 The Starry Sky. New shapes are hiding in the swirls.' }
+];
+var level = 1, unl = 1, lvT = 1, lvDur = 60, lvFrom = null, lvArrived = true;
+function LV(){ return LEVELS[level - 1]; }
+function cpCfg(c){ return { pal: [c.pal[0].slice(), c.pal[1].slice(), c.pal[2].slice(), c.pal[3].slice()], bg: [c.bg[0].slice(), c.bg[1].slice(), c.bg[2].slice()], lum: c.lum.slice(), vg: c.vg }; }
+var vis = cpCfg(LEVELS[0]);
+function lerpA(o, a, b, t){ for (var i = 0; i < o.length; i++) o[i] = a[i] + (b[i] - a[i]) * t; }
+function updateLevel(dt){
+  if (lvT >= 1) return;
+  lvT = Math.min(1, lvT + dt / lvDur);
+  var e = smooth(lvT), to = LV(), k;
+  for (k = 0; k < 4; k++) lerpA(vis.pal[k], lvFrom.pal[k], to.pal[k], e);
+  for (k = 0; k < 3; k++) lerpA(vis.bg[k], lvFrom.bg[k], to.bg[k], e);
+  lerpA(vis.lum, lvFrom.lum, to.lum, e);
+  vis.vg = lvFrom.vg + (to.vg - lvFrom.vg) * e;
+  if (to.drift){ /* slowly re-tint old pigment that doesn't belong in this painting */
+    var a = D[to.drift[0]], b = D[to.drift[1]], f = to.drift[2] * dt;
+    for (var i = 0; i < N; i++){ var q = a[i] * f; a[i] -= q; b[i] += q; }
+  }
+  if (lvT >= 1 && !lvArrived){ lvArrived = true; setPrompt(to.arrive, 6); }
+}
+function goLevel(n, dur){
+  if (n < 1 || n > unl) return;
+  if (n === level && lvT >= 1) return;
+  lvFrom = cpCfg(vis); level = n; lvT = 0; lvDur = dur; lvArrived = false;
+  cur = null; nextPrompt = rnd(14, 20); shapeTimer = rnd(6, 10);
+  setPrompt(LV().enter, 7);
+  setLvLine(); save();
+}
+function setLvLine(){ var L = LV(); DOC.getElementById('lvLine').textContent = level > 1 ? 'Level ' + L.n + ' \u00b7 ' + L.name : ''; }
+function distinctIn(lv){ var n = 0; for (var i = 0; i < SH.length; i++) if (SH[i].lv === lv && found[SH[i].id]) n++; return n; }
+function checkUnlock(){
+  if (unl >= LEVELS.length) return;
+  var nx = LEVELS[unl];
+  if (distinctIn(unl) < nx.need) return;
+  unl++; save();
+  if (level === unl - 1) setTimeout(function(){ goLevel(unl, 70); }, 5000);
+}
+
 function normMix(m){ var s = m[0] + m[1] + m[2] + m[3]; return [m[0]/s, m[1]/s, m[2]/s, m[3]/s]; }
-function randMix(){ return normMix(pick(MIXES)); }
+function randMix(){ return normMix(pick(LV().mixes)); }
 
 /* ================= cloud puffs ================= */
 var puffs = [];
@@ -400,7 +478,73 @@ var SH = [
   }
   SH.push({id:'flower', label:'a flower', cats:['grow'], sym:1, parts:p, eyes:[[0,0,0.09]], goldEye:1});
 })();
-for (var si = 0; si < SH.length; si++) SH[si].idx = si;
+for (var si = 0; si < SH.length; si++) SH[si].lv = 1;
+
+/* ---- level 2: after Vincent van Gogh ---- */
+SH.push(
+ {id:'moon', label:'a crescent moon', cats:['night'], parts:[[0,0,0,0,0.62],[0.34,-0.14,0.34,-0.14,0.54,1]], eyes:[]},
+ {id:'hat', label:'a straw hat', cats:['vincent'], sym:1, parts:[[-0.86,0.22,0.86,0.22,0.12],[-0.4,0.0,0.4,0.0,0.24],[-0.28,-0.26,0.28,-0.26,0.18]], eyes:[]},
+ {id:'pipe', label:"Vincent's pipe", cats:['vincent'], parts:[[0.38,-0.12,0.38,0.16,0.24],[0.38,-0.38,0.38,-0.38,0.13,1],[0.24,0.3,-0.72,0.02,0.075],[-0.72,0.02,-0.9,-0.04,0.065],[0.5,-0.66,0.5,-0.66,0.1],[0.32,-0.88,0.32,-0.88,0.08]], eyes:[]},
+ {id:'boots', label:'a pair of old boots', cats:['vincent'], parts:[[-0.44,-0.62,-0.4,0.28,0.17],[-0.44,0.42,-0.02,0.48,0.15],[0.3,-0.55,0.34,0.28,0.17],[0.32,0.42,0.76,0.5,0.14]], eyes:[]},
+ {id:'coffeepot', label:'a coffee pot', cats:['vincent'], parts:[[0,0.02,0,0.34,0.36],[-0.22,-0.4,0.22,-0.4,0.08],[0,-0.54,0,-0.54,0.08],[-0.3,-0.02,-0.74,-0.38,0.075],[0.36,-0.16,0.64,-0.06,0.07],[0.64,-0.06,0.64,0.3,0.07],[0.64,0.3,0.36,0.4,0.07]], eyes:[]}
+);
+(function(){
+  var i, a, p, t, x, y, px, py;
+  /* swirling star: core + pinwheel rays */
+  p = [[0,0,0,0,0.3]];
+  for (i = 0; i < 8; i++){ a = i / 8 * 6.2832; p.push([Math.cos(a) * 0.24, Math.sin(a) * 0.24, Math.cos(a + 0.55) * 0.74, Math.sin(a + 0.55) * 0.74, 0.075]); }
+  SH.push({id:'star', label:'a swirling star', cats:['night'], sym:1, parts:p, eyes:[[0,0,0.14]], goldEye:1});
+  /* the great swirl */
+  p = []; px = null;
+  for (i = 0; i <= 22; i++){
+    t = i / 22; a = t * 9.6; var r = 0.08 + t * 0.74;
+    x = Math.cos(a) * r; y = Math.sin(a) * r * 0.8;
+    if (px !== null) p.push([px, py, x, y, 0.07 + t * 0.06]);
+    px = x; py = y;
+  }
+  SH.push({id:'swirl', label:'a starry swirl', cats:['swirl'], parts:p, eyes:[]});
+  /* comet: bright head, streaming tail */
+  SH.push({id:'comet', label:'a comet', cats:['swirl','night'], parts:[[-0.56,0,-0.56,0,0.24],[-0.5,-0.08,0.86,-0.42,0.09],[-0.46,0,0.92,0,0.1],[-0.5,0.08,0.86,0.42,0.09]], eyes:[[-0.56,0,0.1]], goldEye:1});
+  /* sunflower: big seed head, many petals, stem and leaf */
+  p = [[0,-0.22,0,-0.22,0.28]];
+  for (i = 0; i < 13; i++){ a = i / 13 * 6.2832; p.push([Math.cos(a) * 0.28, -0.22 + Math.sin(a) * 0.28, Math.cos(a) * 0.58, -0.22 + Math.sin(a) * 0.58, 0.09]); }
+  p.push([0, 0.34, 0.04, 0.94, 0.065], [0.03, 0.7, 0.4, 0.52, 0.08]);
+  SH.push({id:'sunflower', label:'a sunflower', cats:['bloom','grow'], sym:1, parts:p, eyes:[[0,-0.22,0.17]], goldEye:1});
+  /* cypress: a dark green flame */
+  p = [];
+  for (i = 0; i < 8; i++){
+    t = i / 7; y = 0.82 - t * 1.66; x = Math.sin(t * 7.0) * 0.07; var rr = 0.3 * (1 - t) + 0.06;
+    p.push([x, y, x, y, rr]);
+    if (i > 0 && i < 7) p.push([x, y, x + (i % 2 ? 1 : -1) * rr * 1.1, y - 0.2, 0.06]);
+  }
+  SH.push({id:'cypress', label:'a cypress tree', cats:['flame','grow'], parts:p, eyes:[]});
+  /* iris: three standards, two falls, stem, blade leaf */
+  SH.push({id:'iris', label:'an iris', cats:['bloom','grow'], parts:[[0,-0.2,-0.24,-0.66,0.12],[0,-0.2,0,-0.8,0.12],[0,-0.2,0.24,-0.66,0.12],
+    [0,-0.15,-0.48,0.04,0.12],[0,-0.15,0.48,0.04,0.12],[0,-0.1,0.02,0.92,0.06],[0.04,0.9,0.4,0.12,0.065],[0.02,0.88,-0.34,0.34,0.06]], eyes:[]});
+  /* wheat sheaf: fanned stalks tied in the middle */
+  p = [[-0.15,0.18,0.15,0.18,0.09]];
+  var tops = [[-0.44,-0.5],[-0.16,-0.66],[0.16,-0.66],[0.44,-0.5]], bots = [[-0.32,0.86],[0,0.92],[0.32,0.86]];
+  for (i = 0; i < tops.length; i++){
+    p.push([0, 0.18, tops[i][0], tops[i][1], 0.055]);
+    p.push([tops[i][0], tops[i][1], tops[i][0] * 1.25, tops[i][1] - 0.24, 0.1]);
+  }
+  for (i = 0; i < bots.length; i++) p.push([0, 0.18, bots[i][0], bots[i][1], 0.06]);
+  SH.push({id:'wheat', label:'a wheat sheaf', cats:['field'], sym:1, parts:p, eyes:[]});
+  /* a flock of crows */
+  p = [];
+  var cr = [[-0.48,-0.2,1],[0.14,-0.5,0.85],[0.42,0.3,0.75]];
+  for (i = 0; i < cr.length; i++){
+    var c = cr[i], k = c[2];
+    p.push([c[0], c[1], c[0], c[1], 0.1 * k], [c[0], c[1], c[0] - 0.4 * k, c[1] - 0.22 * k, 0.065 * k], [c[0], c[1], c[0] + 0.4 * k, c[1] - 0.22 * k, 0.065 * k]);
+  }
+  SH.push({id:'crows', label:'a flock of crows', cats:['fly','field'], parts:p, eyes:[]});
+})();
+for (si = 0; si < SH.length; si++){ if (!SH[si].lv) SH[si].lv = 2; SH[si].idx = si; }
+function pickShape(){
+  var all = [], fresh = [];
+  for (var i = 0; i < SH.length; i++){ if (SH[i].lv <= level) all.push(SH[i]); if (SH[i].lv === level) fresh.push(SH[i]); }
+  return (level > 1 && Math.random() < 0.65) ? pick(fresh) : pick(all);
+}
 
 function sdCap(px, py, p){
   var ax = p[0], ay = p[1], bx = p[2] - ax, by = p[3] - ay, qx = px - ax, qy = py - ay, bb = bx * bx + by * by;
@@ -597,7 +741,13 @@ var CATS = [
  {k:'face', q:'Someone up there is looking at you.'},
  {k:'build', q:'Where might a king live up there?'},
  {k:'travel', q:'Something is setting off on a journey.'},
- {k:'grow', q:'Something that grows is floating past.'}
+ {k:'grow', q:'Something that grows is floating past.'},
+ {k:'night', q:'Something is glowing in the night sky. Can you find it?', lv:2},
+ {k:'swirl', q:'Something is spinning and streaking between the stars.', lv:2},
+ {k:'bloom', q:'A painter\'s flower is opening up there.', lv:2},
+ {k:'flame', q:'A tree like a dark green flame is reaching for the stars.', lv:2},
+ {k:'field', q:'Something from the wheat fields is drifting by.', lv:2},
+ {k:'vincent', q:'Vincent left something of his up in the clouds.', lv:2}
 ];
 var cur = null, nextPrompt = 9, lastCat = '', promptFadeT = 0;
 var promptEl = DOC.getElementById('prompt');
@@ -607,11 +757,12 @@ function setPrompt(txt, hold){
 }
 function hasCat(def, k){ for (var i = 0; i < def.cats.length; i++) if (def.cats[i] === k) return true; return false; }
 function startPrompt(){
-  var c, tries = 0;
-  do { c = pick(CATS); tries++; } while (c.k === lastCat && tries < 10);
+  var c, tries = 0, pool = [], fresh = [], i;
+  for (i = 0; i < CATS.length; i++){ var lv = CATS[i].lv || 1; if (lv <= level) pool.push(CATS[i]); if (lv === level) fresh.push(CATS[i]); }
+  do { c = (level > 1 && Math.random() < 0.7) ? pick(fresh) : pick(pool); tries++; } while (c.k === lastCat && tries < 10);
   lastCat = c.k;
   var cands = [];
-  for (var i = 0; i < SH.length; i++) if (hasCat(SH[i], c.k)) cands.push(SH[i]);
+  for (i = 0; i < SH.length; i++) if (SH[i].lv <= level && hasCat(SH[i], c.k)) cands.push(SH[i]);
   var sh = spawnShape(pick(cands), null, null, { prompt: true, formT: rnd(8, 10), holdT: 32 });
   cur = { k: c.k, sh: sh, t: 0 };
   setPrompt(c.q, 0);
@@ -621,7 +772,7 @@ function updateDirector(dt){
   for (i = 0; i < shapes.length; i++) if (!shapes[i].prompt) amb++;
   shapeTimer -= dt;
   if (shapeTimer <= 0 && amb < 1 && shapes.length < 2){
-    spawnShape(pick(SH), null, null, {});
+    spawnShape(pickShape(), null, null, {});
     shapeTimer = rnd(10, 17);
   }
   if (promptFadeT > 0){ promptFadeT -= dt; if (promptFadeT <= 0) promptEl.style.opacity = '0'; }
@@ -646,11 +797,12 @@ var jrN = DOC.getElementById('jrN'), jr = DOC.getElementById('jr');
 function loadSave(){
   try {
     var s = JSON.parse(localStorage.getItem('cloudDreams_v1') || 'null');
-    if (s){ found = s.found || {}; points = s.points || 0; if (s.mute) muted = true; if (s.disc === false) discOn = false; }
+    if (s){ found = s.found || {}; points = s.points || 0; if (s.mute) muted = true; if (s.disc === false) discOn = false;
+      unl = clamp(s.unl || 1, 1, LEVELS.length); level = clamp(s.level || 1, 1, unl); }
   } catch (e){}
 }
 function save(){
-  try { localStorage.setItem('cloudDreams_v1', JSON.stringify({ found: found, points: points, mute: muted, disc: discOn })); } catch (e){}
+  try { localStorage.setItem('cloudDreams_v1', JSON.stringify({ found: found, points: points, mute: muted, disc: discOn, level: level, unl: unl })); } catch (e){}
 }
 function discover(sh, x, y){
   if (sh.found){ sparkle(x, y, 6); chime(pent[Math.floor(Math.random() * 3) + 2], 0, 0.05); return; }
@@ -677,6 +829,7 @@ function discover(sh, x, y){
     setPrompt('You found ' + sh.def.label + '!', 4);
     cur = null; nextPrompt = rnd(14, 22);
   }
+  checkUnlock();
 }
 
 /* ================= freeze spots (long press) ================= */
@@ -755,7 +908,7 @@ function spawnDoodle(x, y, type, fast){
 }
 function updateDoodles(dt){
   doodleTimer -= dt;
-  if (doodleTimer <= 0){ doodleTimer = rnd(3, 6); if (doodles.length < 6) spawnDoodle(); }
+  if (doodleTimer <= 0){ doodleTimer = rnd(3, 6); if (doodles.length < 6) spawnDoodle(undefined, undefined, (vis.vg > 0.5 && Math.random() < 0.55) ? pick([0, 7, 7, 2]) : undefined); }
   for (var i = doodles.length - 1; i >= 0; i--){
     var d = doodles[i], vel = velAt(d.x / CS, d.y / CS), fz = vel[2];
     if (fz < 0.3) d.t += dt;
@@ -957,6 +1110,9 @@ var FS = [
 'varying vec2 vUv;',
 'uniform sampler2D uPig;uniform sampler2D uNoise;',
 'uniform float uAsp;uniform float uT;uniform float uGy;uniform vec2 uHalf;',
+'uniform vec3 uC0;uniform vec3 uC1;uniform vec3 uC2;uniform vec3 uC3;uniform vec3 uB0;uniform vec3 uB1;uniform vec3 uB2;uniform vec3 uLum;uniform float uVG;',
+'float h21(vec2 q){return fract(sin(dot(q,vec2(127.1,311.7)))*43758.5453);}',
+'float sum4(vec4 v){return v.r+v.g+v.b+v.a;}',
 'void main(){',
 ' vec2 uv=vec2(vUv.x,1.0-vUv.y);',
 ' vec2 p=vec2(uv.x,uv.y*uAsp);',
@@ -968,11 +1124,10 @@ var FS = [
 ' vec4 Pb=texture2D(uPig,g+(n2.gr-0.5)*vec2(0.035,0.035*uGy/uAsp))*1.275;',
 ' P=P*0.65+Pb*0.35;',
 ' float s=P.r+P.g+P.b+P.a;',
-' vec3 IND=vec3(0.15,0.18,0.78);vec3 VIO=vec3(0.56,0.22,0.80);vec3 TUR=vec3(0.10,0.66,0.90);vec3 OCH=vec3(0.74,0.58,0.22);',
-' vec3 cc=(P.r*IND+P.g*VIO+P.b*TUR+P.a*OCH)/max(s,0.0001);',
+' vec3 cc=(P.r*uC0+P.g*uC1+P.b*uC2+P.a*uC3)/max(s,0.0001);',
 ' float bn=texture2D(uNoise,p*0.55+vec2(0.0,uT*0.0015)).r*0.6+texture2D(uNoise,p*1.3).g*0.4;',
-' vec3 bg=mix(vec3(0.028,0.024,0.05),vec3(0.17,0.16,0.21),smoothstep(0.42,0.78,bn)*0.6);',
-' bg=mix(bg,vec3(0.16,0.07,0.24),(1.0-smoothstep(0.0,0.6,uv.y))*0.45*bn);',
+' vec3 bg=mix(uB0,uB1,smoothstep(0.42,0.78,bn)*0.6);',
+' bg=mix(bg,uB2,(1.0-smoothstep(0.0,0.6,uv.y))*0.45*bn);',
 ' float hn=texture2D(uNoise,p*5.5+vec2(uT*0.002,0.0)).b;',
 ' float sn=s+(hn-0.5)*0.16*smoothstep(0.0,0.35,s);',
 ' float a=smoothstep(0.06,0.4,sn);',
@@ -981,9 +1136,37 @@ var FS = [
 ' float vn=texture2D(uNoise,p*2.8+vec2(0.31,uT*0.002)).g;',
 ' vec3 col=cc*(0.78+0.45*vn);',
 ' col=mix(col,cc*cc*0.85,rim*0.75);',
-' col=mix(col,mix(col,vec3(0.88,0.82,0.99),0.5),lum*0.65);',
+' col=mix(col,mix(col,uLum,0.5),lum*0.65);',
 ' float gr=texture2D(uNoise,p*13.0).a;',
 ' col*=0.84+0.3*gr;',
+' if(uVG>0.001){',
+/* brushstrokes follow the form: bands along cloud density contours, swirling noise contours in the open sky */
+'  float fS=sum4(texture2D(uPig,g))*1.275;',
+'  float sw=texture2D(uNoise,p*0.42+vec2(uT*0.0016,-uT*0.001)).r*0.7+texture2D(uNoise,p*0.9+vec2(0.0,uT*0.002)).g*0.3;',
+'  float field=mix(sw*3.4,fS*1.9+sw*0.8,a);',
+'  float band=field*4.0+(n2.r-0.5)*0.22;',
+'  float id=floor(band);float fr=fract(band);',
+'  float ridge=smoothstep(0.0,0.3,fr)*(1.0-smoothstep(0.62,0.98,fr));',
+'  float brk=smoothstep(0.42,0.62,texture2D(uNoise,p*6.0+vec2(id*0.131,id*0.293)).r);',
+'  float stroke=ridge*brk;',
+'  float hv=texture2D(uNoise,p*2.2+vec2(id*0.37,id*0.61)).b;',
+'  vec3 bgS=mix(uB1*1.35,mix(uC0,uC2,0.55)*0.8,smoothstep(0.45,0.8,hv));',
+'  vec3 bgV=bg*(0.82+0.18*smoothstep(0.2,0.6,sw))*(0.9+0.1*ridge);bgV=mix(bgV,bgS,stroke*0.7);',
+/* star halos: bright cores with ringed glows, fewer near the hills */
+'  vec2 sp=p*vec2(3.4,3.4);vec2 ci=floor(sp);vec2 cf=fract(sp);float hs=h21(ci);',
+'  vec2 sc=vec2(0.5)+(vec2(h21(ci+7.13),h21(ci+3.31))-0.5)*0.3;float d=length(cf-sc);',
+'  float on=step(0.6,hs)*(1.0-smoothstep(0.62,0.9,uv.y));',
+'  float tw=0.8+0.2*sin(uT*1.6+hs*40.0);',
+'  float core=smoothstep(0.1,0.03,d);',
+'  float halo=smoothstep(0.3,0.06,d)*(0.5+0.5*sin(d*62.0-uT*0.9+hs*20.0));',
+'  bgV=mix(bgV,mix(uC2,uC3,0.75),on*halo*0.7*tw);',
+'  bgV=mix(bgV,mix(uC3,vec3(1.0,0.99,0.9),0.6),on*core*tw);',
+'  vec3 tint=mix(uC0,uC3,smoothstep(0.35,0.75,hv));',
+'  vec3 colV=col*(0.78+0.38*ridge*(0.4+0.6*brk));',
+'  colV=mix(colV,tint*1.05,0.24*stroke);',
+'  colV=mix(colV,uLum,smoothstep(0.82,1.0,ridge)*brk*0.22*a);',
+'  bg=mix(bg,bgV,uVG);col=mix(col,colV,uVG);',
+' }',
 ' vec3 o=mix(bg,col,a*0.95);',
 ' float thin=smoothstep(0.0,0.06,s)*(1.0-a);',
 ' o=mix(o,bg*0.55+cc*0.3,thin*0.55);',
@@ -1030,7 +1213,7 @@ function initGL(){
   var buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
   var al = gl.getAttribLocation(prog, 'a'); gl.enableVertexAttribArray(al); gl.vertexAttribPointer(al, 2, gl.FLOAT, false, 0, 0);
-  var names = ['uPig','uNoise','uAsp','uT','uGy','uHalf'], i;
+  var names = ['uPig','uNoise','uAsp','uT','uGy','uHalf','uC0','uC1','uC2','uC3','uB0','uB1','uB2','uLum','uVG'], i;
   for (i = 0; i < names.length; i++) U[names[i]] = gl.getUniformLocation(prog, names[i]);
   var NS = 256, r = tileNoise(NS, 8, 11), g = tileNoise(NS, 16, 23), b = tileNoise(NS, 32, 37), a = tileNoise(NS, 64, 51), nd = new Uint8Array(NS * NS * 4);
   for (i = 0; i < NS * NS; i++){ nd[i*4] = r[i] * 255; nd[i*4+1] = g[i] * 255; nd[i*4+2] = b[i] * 255; nd[i*4+3] = a[i] * 255; }
@@ -1059,14 +1242,19 @@ function render(){
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, NX, NY, 0, gl.RGBA, gl.UNSIGNED_BYTE, texData);
     gl.uniform1f(U.uAsp, H / W); gl.uniform1f(U.uT, time); gl.uniform1f(U.uGy, VNY / NY);
     gl.uniform2f(U.uHalf, 0.5 / NX, 0.5 / NY);
+    gl.uniform3fv(U.uC0, vis.pal[0]); gl.uniform3fv(U.uC1, vis.pal[1]); gl.uniform3fv(U.uC2, vis.pal[2]); gl.uniform3fv(U.uC3, vis.pal[3]);
+    gl.uniform3fv(U.uB0, vis.bg[0]); gl.uniform3fv(U.uB1, vis.bg[1]); gl.uniform3fv(U.uB2, vis.bg[2]);
+    gl.uniform3fv(U.uLum, vis.lum); gl.uniform1f(U.uVG, vis.vg);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   } else if (fallback){
-    var img = fallback.img, px = img.data, cols = [[38,46,199],[143,56,204],[26,168,230],[189,148,56]];
+    var img = fallback.img, px = img.data, cols = [], b0 = vis.bg[0];
+    for (var c0 = 0; c0 < 4; c0++) cols.push([vis.pal[c0][0] * 255, vis.pal[c0][1] * 255, vis.pal[c0][2] * 255]);
     for (var i = 0; i < N; i++){
       var s = 0, rr = 0, gg = 0, bb = 0;
       for (var k = 0; k < 4; k++){ var q = D[k][i]; s += q; rr += cols[k][0] * q; gg += cols[k][1] * q; bb += cols[k][2] * q; }
       var al = clamp(s * 1.6, 0, 1), m = 1 / Math.max(s, 0.001);
-      px[i*4] = 9 + (rr * m - 9) * al; px[i*4+1] = 8 + (gg * m - 8) * al; px[i*4+2] = 16 + (bb * m - 16) * al; px[i*4+3] = 255;
+      var br = 7 + b0[0] * 72, bgc = 6 + b0[1] * 72, bbc = 12 + b0[2] * 72;
+      px[i*4] = br + (rr * m - br) * al; px[i*4+1] = bgc + (gg * m - bgc) * al; px[i*4+2] = bbc + (bb * m - bbc) * al; px[i*4+3] = 255;
     }
     fallback.sc.putImageData(img, 0, 0);
     fallback.ctx.imageSmoothingEnabled = true;
@@ -1272,14 +1460,14 @@ function tap(x, y){
   rings.push({ x: x, y: y, t: 0, life: 1.1, r0: 6, r1: 38, seed: Math.random() * 9 });
   playPlip();
   if (!sh && densAt(gx, gy) > 0.25 && shapes.length < 2 && Math.random() < 0.35){
-    if (!shapeAt(gx, gy, 0, 0.6)) spawnShape(pick(SH), gx, gy, { formT: rnd(5, 7) });
+    if (!shapeAt(gx, gy, 0, 0.6)) spawnShape(pickShape(), gx, gy, { formT: rnd(5, 7) });
   }
 }
 function doubleTap(x, y){
   var gx = x / CS, gy = y / CS, sh = shapeAt(gx, gy, 0.12, 0.3);
   if (sh){
     var def, tries = 0;
-    do { def = pick(SH); tries++; } while (def === sh.def && tries < 10);
+    do { def = pickShape(); tries++; } while (def === sh.def && tries < 10);
     var idx = shapes.indexOf(sh);
     if (idx >= 0) shapes.splice(idx, 1);
     var ns = spawnShape(def, sh.cx, sh.cy, { formT: rnd(3.5, 4.5), str: sh.str * 0.5, prompt: sh.prompt, holdT: sh.prompt ? 26 : rnd(10, 14) });
@@ -1291,7 +1479,7 @@ function doubleTap(x, y){
     splatRad(gx, gy, 38, 5.5);
     splatSwirl(gx - 4, gy, 3, 3.5); splatSwirl(gx + 4, gy, -3, 3.5);
     addPig(gx, gy, 3.5, 0.6, randMix());
-    if (shapes.length < 2 && densAt(gx, gy) > 0.15 && Math.random() < 0.6) spawnShape(pick(SH), gx, gy, { formT: rnd(4.5, 6) });
+    if (shapes.length < 2 && densAt(gx, gy) > 0.15 && Math.random() < 0.6) spawnShape(pickShape(), gx, gy, { formT: rnd(4.5, 6) });
   }
   rings.push({ x: x, y: y, t: 0, life: 1.6, r0: 10, r1: 90, seed: Math.random() * 9, big: true });
   spawnDoodle(x, y, 7, true);
@@ -1337,6 +1525,7 @@ function begin(){
   intro.style.opacity = '0';
   setTimeout(function(){ intro.style.display = 'none'; }, 1250);
   nextPrompt = 8;
+  setTimeout(checkUnlock, 6000);
 }
 function tapBtn(el, fn){
   var lastT = 0;
@@ -1373,7 +1562,6 @@ function deckle(c, w, h, seed, inset){
   for (i = 0; i <= n; i++) c.lineTo(inset + j(i + 350), h - inset - i / n * (h - 2 * inset) + j(i + 400));
   c.closePath();
 }
-var CARDCOL = ['#2c33c7','#8f38cc','#1aa8e6','#bd9438','#6a2fb0','#2a7fd4'];
 function drawCard(cv, def, have){
   var w = cv.width, h = cv.height, c = cv.getContext('2d'), k = w / 100, i;
   c.clearRect(0, 0, w, h);
@@ -1382,7 +1570,7 @@ function drawCard(cv, def, have){
   if (have){
     for (i = 0; i < 4; i++){
       var gx = w * (0.15 + hash2(def.idx, i) * 0.7), gy = h * (0.1 + hash2(i, def.idx + 3) * 0.8), rr = w * (0.35 + hash2(def.idx + i, 9) * 0.35);
-      var g = c.createRadialGradient(gx, gy, 0, gx, gy, rr), col = CARDCOL[(def.idx + i) % CARDCOL.length];
+      var CC = LEVELS[def.lv - 1].card, g = c.createRadialGradient(gx, gy, 0, gx, gy, rr), col = CC[(def.idx + i) % CC.length];
       g.addColorStop(0, col); g.addColorStop(0.6, col); g.addColorStop(1, 'rgba(10,8,18,0)');
       c.globalAlpha = 0.75; c.fillStyle = g; c.fillRect(0, 0, w, h);
     }
@@ -1420,20 +1608,36 @@ function drawCard(cv, def, have){
 }
 function openBook(){
   paused = true;
-  var cards = DOC.getElementById('cards'), have = 0, i;
-  cards.innerHTML = '';
-  for (i = 0; i < SH.length; i++){
-    var def = SH[i], got = !!found[def.id];
-    if (got) have++;
-    var wrap = DOC.createElement('div'); wrap.className = 'card';
-    var cv = DOC.createElement('canvas'); cv.width = 200; cv.height = 250;
-    var lab = DOC.createElement('div');
-    if (got){ lab.textContent = def.label.replace(/^an? /, '') + (found[def.id] > 1 ? ' x' + found[def.id] : ''); }
-    else { lab.textContent = 'not yet'; lab.className = 'n'; }
-    wrap.appendChild(cv); wrap.appendChild(lab); cards.appendChild(wrap);
-    drawCard(cv, def, got);
+  var cards = DOC.getElementById('cards'), levs = DOC.getElementById('levels'), have = 0, avail = 0, i, L;
+  cards.innerHTML = ''; levs.innerHTML = '';
+  for (L = 1; L <= LEVELS.length; L++){
+    var cfg = LEVELS[L - 1], b = DOC.createElement('button'), open = L <= unl;
+    b.className = 'lvb pen' + (L === level ? ' on' : '') + (open ? '' : ' lock');
+    var sub = open ? cfg.by + (L === level ? ' \u00b7 you are here' : ' \u00b7 tap to drift here')
+                   : 'find ' + cfg.need + ' different shapes in Level ' + (L - 1) + ' to open (' + Math.min(cfg.need, distinctIn(L - 1)) + '/' + cfg.need + ')';
+    b.innerHTML = 'Level ' + L + ' \u00b7 ' + (open ? cfg.name : '???') + '<small>' + sub + '</small>';
+    if (open) (function(n){ b.addEventListener('click', function(e){ e.stopPropagation(); book.style.display = 'none'; paused = false; goLevel(n, 25); }); })(L);
+    levs.appendChild(b);
   }
-  DOC.getElementById('bookStat').innerHTML = have + ' of ' + SH.length + ' shapes found<br>' + points + (points === 1 ? ' discovery' : ' discoveries') + ' so far';
+  for (L = 1; L <= unl; L++){
+    var h = DOC.createElement('div'); h.className = 'lvh'; h.style.width = '100%';
+    h.textContent = 'Level ' + L + ' \u00b7 ' + LEVELS[L - 1].name; cards.appendChild(h);
+    for (i = 0; i < SH.length; i++){
+      var def = SH[i], got = !!found[def.id];
+      if (def.lv !== L) continue;
+      avail++; if (got) have++;
+      var wrap = DOC.createElement('div'); wrap.className = 'card';
+      var cv = DOC.createElement('canvas'); cv.width = 200; cv.height = 250;
+      var lab = DOC.createElement('div');
+      if (got){ lab.textContent = def.label.replace(/^an? /, '') + (found[def.id] > 1 ? ' x' + found[def.id] : ''); }
+      else { lab.textContent = 'not yet'; lab.className = 'n'; }
+      wrap.appendChild(cv); wrap.appendChild(lab); cards.appendChild(wrap);
+      drawCard(cv, def, got);
+    }
+    var pad = (3 - (cards.querySelectorAll('.card').length % 3)) % 3;
+    for (i = 0; i < pad; i++){ var sp = DOC.createElement('div'); sp.className = 'card'; cards.appendChild(sp); }
+  }
+  DOC.getElementById('bookStat').innerHTML = have + ' of ' + avail + ' shapes found<br>' + points + (points === 1 ? ' discovery' : ' discoveries') + ' so far';
   book.style.display = 'block'; book.scrollTop = 0;
 }
 
@@ -1451,6 +1655,7 @@ var ft = 0.016, fc = 0;
 function simStep(dt){
   var sdt = Math.min(dt, 0.033);
   ambient(sdt);
+  bigSwirls(sdt);
   updateSpots(sdt);
   updatePuffs(sdt);
   updateShapes(sdt);
@@ -1467,6 +1672,7 @@ function loop(ts){
   if (dt > 0.05) dt = 0.05;
   if (!paused){
     time += dt;
+    updateLevel(dt);
     simStep(dt);
     updateDirector(dt);
     updateDoodles(dt);
@@ -1484,6 +1690,7 @@ window.addEventListener('orientationchange', function(){ setTimeout(resize, 300)
 DOC.addEventListener('visibilitychange', function(){ if (!AC) return; if (DOC.hidden){ if (AC.suspend) AC.suspend(); } else if (AC.resume) AC.resume(); });
 
 loadSave();
+vis = cpCfg(LV()); setLvLine();
 resize();
 if (!initGL()) initFallback();
 seedSky();
