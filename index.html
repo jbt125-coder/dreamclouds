@@ -169,7 +169,7 @@ function breeze(){ return 1.8 + 0.9 * Math.sin(time * 0.013) + 0.35 * Math.sin(t
 
 /* gentle curl-noise sky currents + breeze (separable trig = cheap) */
 function ambient(dt){
-  var t = time * 0.05, x, y, i, bz = breeze(), AMP = 14 + 8 * vis.vg;
+  var t = time * 0.05, x, y, i, bz = breeze(), AMP = vis.amp;
   for (x = 0; x < NX; x++){
     var a = x * 0.09 + t, A = x * 0.153 + t * 1.3;
     colCa[x] = Math.cos(a); colSa[x] = Math.sin(a); colCA[x] = Math.cos(A); colSA[x] = Math.sin(A);
@@ -194,7 +194,7 @@ function ambient(dt){
 
 /* vorticity confinement = billowy curls */
 function vorticity(dt){
-  var x, y, i, VORT = 5.5 + 4.5 * vis.vg;
+  var x, y, i, VORT = vis.vort;
   for (y = 0; y < NY; y++){
     for (x = 0; x < NX; x++){
       i = x + y * NX;
@@ -277,7 +277,7 @@ function project(iters){
 /* van gogh: two great slow whirlpools roll across the sky */
 var vortices = [{ x: 0.28, y: 0.34, s: 1 }, { x: 0.74, y: 0.62, s: -1 }];
 function bigSwirls(dt){
-  var k = vis.vg;
+  var k = vis.whirl;
   if (k < 0.05) return;
   for (var i = 0; i < vortices.length; i++){
     var w = vortices[i];
@@ -346,6 +346,8 @@ function velAt(gx, gy){ var i = cellIdx(gx, gy); return [u[i], v[i], frz[i]]; }
 var MIXES = [[1,0.25,0,0],[0.25,1,0,0],[0,0.2,1,0],[0.55,0,0.85,0],[0.7,0.7,0,0],[0.1,0,0.3,1],
              [0.3,0.9,0.45,0],[0.9,0,0.2,0.2],[0,0.6,0.7,0],[0.4,0.3,0,0.6]];
 /* Van Gogh: 0 electric blue, 1 fiery orange, 2 turquoise, 3 chrome yellow (mostly blues, gold swirls, a little fire) */
+/* Matisse: 0 ultramarine, 1 hot pink, 2 emerald, 3 marigold (pure, unmixed colors) */
+var MIXES3 = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1],[1,0.12,0,0],[0,0,1,0.12],[0.08,1,0,0],[0,0,0.08,1],[1,0,0,0],[0,0,1,0]];
 var MIXES2 = [[1,0,0.5,0],[0.4,0,1,0],[0,0,1,0.45],[0,0,0.35,1],[0.25,0,0.7,0.55],[0,0.55,0,1],
               [1,0,0.2,0.12],[0.65,0,0.85,0.15],[0,0.12,0.35,1],[0.9,0,1,0]];
 
@@ -354,18 +356,28 @@ var MIXES2 = [[1,0,0.5,0],[0.4,0,1,0],[0,0,1,0.45],[0,0,0.35,1],[0.25,0,0.7,0.55
 var LEVELS = [
  { n: 1, name: 'Watercolor Sky', by: 'a dreamy watercolor', need: 0, mixes: MIXES,
    pal: [[0.15,0.18,0.78],[0.56,0.22,0.80],[0.10,0.66,0.90],[0.74,0.58,0.22]],
-   bg: [[0.028,0.024,0.05],[0.17,0.16,0.21],[0.16,0.07,0.24]], lum: [0.88,0.82,0.99], vg: 0, drift: null,
+   bg: [[0.028,0.024,0.05],[0.17,0.16,0.21],[0.16,0.07,0.24]], lum: [0.88,0.82,0.99], vg: 0, mt: 0, amp: 14, vort: 5.5, whirl: 0, doodles: null, drift: null,
    card: ['#2c33c7','#8f38cc','#1aa8e6','#bd9438','#6a2fb0','#2a7fd4'],
    enter: 'The sky is softening back into watercolor...', arrive: 'Level 1 \u00b7 Watercolor Sky' },
  { n: 2, name: 'The Starry Sky', by: 'after Vincent van Gogh', need: 8, mixes: MIXES2,
    pal: [[0.10,0.26,0.86],[0.96,0.50,0.12],[0.36,0.78,0.84],[0.99,0.84,0.28]],
-   bg: [[0.025,0.05,0.17],[0.11,0.21,0.47],[0.03,0.13,0.25]], lum: [1.0,0.96,0.74], vg: 1, drift: [1, 2, 0.03],
+   bg: [[0.025,0.05,0.17],[0.11,0.21,0.47],[0.03,0.13,0.25]], lum: [1.0,0.96,0.74], vg: 1, mt: 0, amp: 22, vort: 10, whirl: 1, doodles: [0, 7, 7, 2], drift: [1, 2, 0.03],
    card: ['#1f3fbf','#f0a43a','#5fc4d6','#f6d24a','#2a58c9','#e8862a'],
-   enter: 'The sky is beginning to dream like Vincent van Gogh...', arrive: 'Level 2 \u00b7 The Starry Sky. New shapes are hiding in the swirls.' }
+   enter: 'The sky is beginning to dream like Vincent van Gogh...', arrive: 'Level 2 \u00b7 The Starry Sky. New shapes are hiding in the swirls.' },
+ { n: 3, name: 'The Red Room', by: 'after Henri Matisse', need: 8, mixes: MIXES3,
+   pal: [[0.07,0.20,0.80],[0.98,0.36,0.60],[0.04,0.60,0.36],[1.0,0.70,0.10]],
+   bg: [[0.56,0.05,0.06],[0.80,0.13,0.09],[0.09,0.15,0.62]], lum: [1.0,0.97,0.9], vg: 0, mt: 1, amp: 15, vort: 3.5, whirl: 0, doodles: [4, 2, 4, 1], drift: null,
+   card: ['#1f3fbf','#f0528a','#14a05f','#ff9d1a','#d42a2a','#2a58c9'],
+   enter: 'The sky is turning into bold cut-paper colors, like Henri Matisse...', arrive: 'Level 3 \u00b7 The Red Room. New cut-out shapes are floating by.' }
 ];
 var level = 1, unl = 1, lvT = 1, lvDur = 60, lvFrom = null, lvArrived = true;
 function LV(){ return LEVELS[level - 1]; }
-function cpCfg(c){ return { pal: [c.pal[0].slice(), c.pal[1].slice(), c.pal[2].slice(), c.pal[3].slice()], bg: [c.bg[0].slice(), c.bg[1].slice(), c.bg[2].slice()], lum: c.lum.slice(), vg: c.vg }; }
+var KNOBS = ['vg', 'mt', 'amp', 'vort', 'whirl'];
+function cpCfg(c){
+  var o = { pal: [c.pal[0].slice(), c.pal[1].slice(), c.pal[2].slice(), c.pal[3].slice()], bg: [c.bg[0].slice(), c.bg[1].slice(), c.bg[2].slice()], lum: c.lum.slice() };
+  for (var k = 0; k < KNOBS.length; k++) o[KNOBS[k]] = c[KNOBS[k]];
+  return o;
+}
 var vis = cpCfg(LEVELS[0]);
 function lerpA(o, a, b, t){ for (var i = 0; i < o.length; i++) o[i] = a[i] + (b[i] - a[i]) * t; }
 function updateLevel(dt){
@@ -375,7 +387,7 @@ function updateLevel(dt){
   for (k = 0; k < 4; k++) lerpA(vis.pal[k], lvFrom.pal[k], to.pal[k], e);
   for (k = 0; k < 3; k++) lerpA(vis.bg[k], lvFrom.bg[k], to.bg[k], e);
   lerpA(vis.lum, lvFrom.lum, to.lum, e);
-  vis.vg = lvFrom.vg + (to.vg - lvFrom.vg) * e;
+  for (k = 0; k < KNOBS.length; k++) vis[KNOBS[k]] = lvFrom[KNOBS[k]] + (to[KNOBS[k]] - lvFrom[KNOBS[k]]) * e;
   if (to.drift){ /* slowly re-tint old pigment that doesn't belong in this painting */
     var a = D[to.drift[0]], b = D[to.drift[1]], f = to.drift[2] * dt;
     for (var i = 0; i < N; i++){ var q = a[i] * f; a[i] -= q; b[i] += q; }
@@ -539,7 +551,40 @@ SH.push(
   }
   SH.push({id:'crows', label:'a flock of crows', cats:['fly','field'], parts:p, eyes:[]});
 })();
-for (si = 0; si < SH.length; si++){ if (!SH[si].lv) SH[si].lv = 2; SH[si].idx = si; }
+for (si = 0; si < SH.length; si++) if (!SH[si].lv) SH[si].lv = 2;
+
+/* ---- level 3: after Henri Matisse (cut-outs and the red room) ---- */
+SH.push(
+ {id:'goldfish', label:'a goldfish bowl', cats:['sea','room'], sym:1, parts:[[0,0.08,0,0.08,0.62],[-0.34,-0.58,0.34,-0.58,0.09],[-0.3,0.76,0.3,0.76,0.08],
+   [-0.26,0.1,0.08,0.1,0.14,1],[0.08,0.1,0.32,-0.06,0.075,1],[0.08,0.1,0.32,0.26,0.075,1]], eyes:[]},
+ {id:'dancer', label:'a dancer', cats:['dance'], parts:[[-0.05,-0.72,-0.05,-0.72,0.15],[-0.05,-0.5,0.05,0.1,0.17],[-0.1,-0.42,-0.58,-0.86,0.07],[0,-0.42,0.52,-0.72,0.07],
+   [0,0.12,-0.3,0.86,0.08],[0.05,0.12,0.58,0.44,0.08]], eyes:[]},
+ {id:'heart', label:'a heart', cats:['dance'], sym:1, parts:[[-0.27,-0.24,-0.27,-0.24,0.33],[0.27,-0.24,0.27,-0.24,0.33],[-0.28,-0.12,0,0.6,0.22],[0.28,-0.12,0,0.6,0.22]], eyes:[]},
+ {id:'swallow', label:'a swallow', cats:['fly'], parts:[[-0.52,0,0.3,0.02,0.12],[-0.15,0,0.32,-0.82,0.08],[-0.12,0.02,0.28,0.72,0.07],[0.3,0.02,0.88,-0.24,0.05],[0.3,0.02,0.88,0.26,0.05]], eyes:[[-0.5,-0.03,0.035]]},
+ {id:'parakeet', label:'a parakeet', cats:['fly','tropic'], parts:[[0,-0.12,0.1,0.28,0.22],[-0.1,-0.46,-0.1,-0.46,0.17],[-0.27,-0.43,-0.37,-0.33,0.06],[0.12,0.42,0.36,0.95,0.07],[-0.72,0.44,0.62,0.44,0.05]], eyes:[[-0.15,-0.5,0.04]]},
+ {id:'pineapple', label:'a pineapple', cats:['tropic'], sym:1, parts:[[0,0.14,0,0.46,0.36],[0,-0.18,-0.32,-0.74,0.06],[0,-0.18,0,-0.92,0.065],[0,-0.18,0.32,-0.74,0.06],
+   [-0.14,0.06,-0.14,0.06,0.065,1],[0.14,0.06,0.14,0.06,0.065,1],[0,0.3,0,0.3,0.065,1],[-0.14,0.54,-0.14,0.54,0.065,1],[0.14,0.54,0.14,0.54,0.065,1]], eyes:[]},
+ {id:'vase', label:'a vase of flowers', cats:['room','grow'], sym:1, parts:[[0,0.48,0,0.6,0.25],[0,0.12,0,0.32,0.1],[0,0.12,-0.36,-0.44,0.04],[0,0.12,0,-0.6,0.04],[0,0.12,0.38,-0.38,0.04],
+   [-0.38,-0.5,-0.38,-0.5,0.15],[0,-0.68,0,-0.68,0.15],[0.4,-0.44,0.4,-0.44,0.15]], eyes:[]},
+ {id:'violin', label:'a violin', cats:['room'], parts:[[0,0.38,0,0.38,0.3],[0,-0.12,0,-0.12,0.24],[0,-0.1,0,0.4,0.2],[0,-0.35,0,-0.84,0.06],[0,-0.9,0,-0.9,0.08]], eyes:[]},
+ {id:'armchair', label:'an armchair', cats:['room'], sym:1, parts:[[-0.32,-0.55,0.32,-0.55,0.18],[-0.32,-0.5,-0.32,-0.05,0.18],[0.32,-0.5,0.32,-0.05,0.18],[-0.46,0.16,0.46,0.16,0.14],
+   [-0.64,-0.2,-0.64,0.16,0.12],[0.64,-0.2,0.64,0.16,0.12],[-0.46,0.26,-0.52,0.76,0.06],[0.46,0.26,0.52,0.76,0.06]], eyes:[]},
+ {id:'window', label:'an open window', cats:['room'], sym:1, parts:[[-0.48,-0.7,0.48,-0.7,0.08],[-0.48,0.7,0.48,0.7,0.08],[-0.48,-0.7,-0.48,0.7,0.08],[0.48,-0.7,0.48,0.7,0.08],
+   [0,-0.7,0,0.7,0.055],[-0.48,0,0.48,0,0.055],[-0.78,-0.56,-0.78,0.56,0.14],[0.78,-0.56,0.78,0.56,0.14]], eyes:[]}
+);
+(function(){
+  var i, p, y, side;
+  /* seaweed: a wavy stem with alternating lobed fronds, like the big cut-outs */
+  p = [[0,0.9,0.06,0.3,0.065],[0.06,0.3,-0.04,-0.3,0.06],[-0.04,-0.3,0.02,-0.86,0.055]];
+  for (i = 0; i < 5; i++){ y = 0.62 - i * 0.34; side = i % 2 ? 1 : -1; p.push([0, y, side * 0.5, y - 0.2, 0.12 - i * 0.012]); }
+  SH.push({id:'seaweed', label:'a seaweed leaf', cats:['sea','grow'], parts:p, eyes:[]});
+  /* coral: branching arms with round tips */
+  p = [[0,0.9,0,0.3,0.09],[0,0.3,-0.4,-0.2,0.075],[0,0.3,0.36,-0.1,0.075],[-0.4,-0.2,-0.58,-0.7,0.07],[-0.4,-0.2,-0.14,-0.66,0.07],[0.36,-0.1,0.62,-0.55,0.07],[0.36,-0.1,0.24,-0.82,0.07]];
+  var tips = [[-0.58,-0.7],[-0.14,-0.66],[0.62,-0.55],[0.24,-0.82]];
+  for (i = 0; i < tips.length; i++) p.push([tips[i][0], tips[i][1], tips[i][0], tips[i][1], 0.11]);
+  SH.push({id:'coral', label:'a coral branch', cats:['sea','tropic'], parts:p, eyes:[]});
+})();
+for (si = 0; si < SH.length; si++){ if (!SH[si].lv) SH[si].lv = 3; SH[si].idx = si; }
 function pickShape(){
   var all = [], fresh = [];
   for (var i = 0; i < SH.length; i++){ if (SH[i].lv <= level) all.push(SH[i]); if (SH[i].lv === level) fresh.push(SH[i]); }
@@ -747,7 +792,11 @@ var CATS = [
  {k:'bloom', q:'A painter\'s flower is opening up there.', lv:2},
  {k:'flame', q:'A tree like a dark green flame is reaching for the stars.', lv:2},
  {k:'field', q:'Something from the wheat fields is drifting by.', lv:2},
- {k:'vincent', q:'Vincent left something of his up in the clouds.', lv:2}
+ {k:'vincent', q:'Vincent left something of his up in the clouds.', lv:2},
+ {k:'sea', q:'Something from a paper ocean is floating by.', lv:3},
+ {k:'dance', q:'Something up there is full of rhythm. Can you feel it?', lv:3},
+ {k:'room', q:'Something from a bright red room has floated outside.', lv:3},
+ {k:'tropic', q:'Something from a sunny island is drifting past.', lv:3}
 ];
 var cur = null, nextPrompt = 9, lastCat = '', promptFadeT = 0;
 var promptEl = DOC.getElementById('prompt');
@@ -908,7 +957,7 @@ function spawnDoodle(x, y, type, fast){
 }
 function updateDoodles(dt){
   doodleTimer -= dt;
-  if (doodleTimer <= 0){ doodleTimer = rnd(3, 6); if (doodles.length < 6) spawnDoodle(undefined, undefined, (vis.vg > 0.5 && Math.random() < 0.55) ? pick([0, 7, 7, 2]) : undefined); }
+  if (doodleTimer <= 0){ doodleTimer = rnd(3, 6); if (doodles.length < 6) spawnDoodle(undefined, undefined, (LV().doodles && lvT > 0.5 && Math.random() < 0.55) ? pick(LV().doodles) : undefined); }
   for (var i = doodles.length - 1; i >= 0; i--){
     var d = doodles[i], vel = velAt(d.x / CS, d.y / CS), fz = vel[2];
     if (fz < 0.3) d.t += dt;
@@ -1110,7 +1159,7 @@ var FS = [
 'varying vec2 vUv;',
 'uniform sampler2D uPig;uniform sampler2D uNoise;',
 'uniform float uAsp;uniform float uT;uniform float uGy;uniform vec2 uHalf;',
-'uniform vec3 uC0;uniform vec3 uC1;uniform vec3 uC2;uniform vec3 uC3;uniform vec3 uB0;uniform vec3 uB1;uniform vec3 uB2;uniform vec3 uLum;uniform float uVG;',
+'uniform vec3 uC0;uniform vec3 uC1;uniform vec3 uC2;uniform vec3 uC3;uniform vec3 uB0;uniform vec3 uB1;uniform vec3 uB2;uniform vec3 uLum;uniform float uVG;uniform float uMT;',
 'float h21(vec2 q){return fract(sin(dot(q,vec2(127.1,311.7)))*43758.5453);}',
 'float sum4(vec4 v){return v.r+v.g+v.b+v.a;}',
 'void main(){',
@@ -1167,8 +1216,35 @@ var FS = [
 '  colV=mix(colV,uLum,smoothstep(0.82,1.0,ridge)*brk*0.22*a);',
 '  bg=mix(bg,bgV,uVG);col=mix(col,colV,uVG);',
 ' }',
+' if(uMT>0.001){',
+/* cut paper: each cloud takes its single strongest color, flat, with scissor-cut edges */
+'  vec4 P0=texture2D(uPig,g)*1.275;float s0=sum4(P0);',
+'  vec4 Pn=P0/max(max(max(P0.r,P0.g),max(P0.b,P0.a)),0.0001);vec4 Q=Pn*Pn;Q=Q*Q;Q=Q*Q;Q=Q*Q;',
+'  vec3 flatc=(Q.r*uC0+Q.g*uC1+Q.b*uC2+Q.a*uC3)/max(sum4(Q),0.0001);',
+'  float gouache=texture2D(uNoise,vec2(p.x*1.6,p.y*14.0)+vec2(0.13,0.0)).r;',
+'  flatc*=0.92+0.12*gouache;',
+'  float cut=(texture2D(uNoise,p*2.6+vec2(0.5,0.2)).g-0.5)*0.07;',
+'  float ac=smoothstep(0.21,0.225,s0+cut);',
+'  vec2 off=vec2(uHalf.x,uHalf.y)*1.8;',
+'  float so=sum4(texture2D(uPig,g-off))*1.275;',
+'  float shd=smoothstep(0.21,0.225,so+cut)*(1.0-ac);',
+/* the red room: deep red with a blue arabesque of flowers and vines */
+'  vec3 bgM=mix(uB0,uB1,smoothstep(0.3,0.8,bn)*0.55+0.25*gouache);',
+'  vec2 mp=(p+vec2(uT*0.002,0.0))*3.2;mp.x+=0.5*mod(floor(mp.y),2.0);',
+'  vec2 mc=floor(mp);vec2 mf=fract(mp)-0.5;',
+'  float ang=atan(mf.y,mf.x);float rr=length(mf);float hm=h21(mc);',
+'  float pet=0.15+0.06*cos(ang*5.0+hm*6.2832);',
+'  float flw=smoothstep(pet+0.012,pet-0.012,rr)*(1.0-smoothstep(0.045,0.03,rr)*0.85);',
+'  float wy=mp.y+0.13*sin(mp.x*6.2832+mc.y*2.1);float vl=abs(fract(wy)-0.5);',
+'  float vine=smoothstep(0.03,0.012,abs(vl-0.5+0.02));',
+'  float lf=smoothstep(0.09,0.05,length(vec2((fract(mp.x*2.0+0.25)-0.5)*0.6,(fract(wy+0.5)-0.5)-0.06)));',
+'  float pat=max(flw*step(0.25,hm),max(vine,lf))*(0.8+0.2*gouache);',
+'  bgM=mix(bgM,uB2*(0.85+0.2*gouache),pat*0.9);',
+'  bgM*=1.0-shd*0.35;',
+'  bg=mix(bg,bgM,uMT);col=mix(col,flatc,uMT);a=mix(a,ac,uMT);',
+' }',
 ' vec3 o=mix(bg,col,a*0.95);',
-' float thin=smoothstep(0.0,0.06,s)*(1.0-a);',
+' float thin=smoothstep(0.0,0.06,s)*(1.0-a)*(1.0-uMT);',
 ' o=mix(o,bg*0.55+cc*0.3,thin*0.55);',
 ' float pa=texture2D(uNoise,p*8.0+vec2(0.37,0.11)).g;',
 ' o*=0.9+0.13*pa;',
@@ -1213,7 +1289,7 @@ function initGL(){
   var buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
   var al = gl.getAttribLocation(prog, 'a'); gl.enableVertexAttribArray(al); gl.vertexAttribPointer(al, 2, gl.FLOAT, false, 0, 0);
-  var names = ['uPig','uNoise','uAsp','uT','uGy','uHalf','uC0','uC1','uC2','uC3','uB0','uB1','uB2','uLum','uVG'], i;
+  var names = ['uPig','uNoise','uAsp','uT','uGy','uHalf','uC0','uC1','uC2','uC3','uB0','uB1','uB2','uLum','uVG','uMT'], i;
   for (i = 0; i < names.length; i++) U[names[i]] = gl.getUniformLocation(prog, names[i]);
   var NS = 256, r = tileNoise(NS, 8, 11), g = tileNoise(NS, 16, 23), b = tileNoise(NS, 32, 37), a = tileNoise(NS, 64, 51), nd = new Uint8Array(NS * NS * 4);
   for (i = 0; i < NS * NS; i++){ nd[i*4] = r[i] * 255; nd[i*4+1] = g[i] * 255; nd[i*4+2] = b[i] * 255; nd[i*4+3] = a[i] * 255; }
@@ -1244,7 +1320,7 @@ function render(){
     gl.uniform2f(U.uHalf, 0.5 / NX, 0.5 / NY);
     gl.uniform3fv(U.uC0, vis.pal[0]); gl.uniform3fv(U.uC1, vis.pal[1]); gl.uniform3fv(U.uC2, vis.pal[2]); gl.uniform3fv(U.uC3, vis.pal[3]);
     gl.uniform3fv(U.uB0, vis.bg[0]); gl.uniform3fv(U.uB1, vis.bg[1]); gl.uniform3fv(U.uB2, vis.bg[2]);
-    gl.uniform3fv(U.uLum, vis.lum); gl.uniform1f(U.uVG, vis.vg);
+    gl.uniform3fv(U.uLum, vis.lum); gl.uniform1f(U.uVG, vis.vg); gl.uniform1f(U.uMT, vis.mt);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   } else if (fallback){
     var img = fallback.img, px = img.data, cols = [], b0 = vis.bg[0];
