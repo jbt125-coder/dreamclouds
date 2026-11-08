@@ -351,6 +351,8 @@ var MIXES = [[1,0.25,0,0],[0.25,1,0,0],[0,0.2,1,0],[0.55,0,0.85,0],[0.7,0.7,0,0]
 var MIXES3 = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1],[1,0.12,0,0],[0,0,1,0.12],[0.08,1,0,0],[0,0,0.08,1],[1,0,0,0],[0,0,1,0]];
 /* Kandinsky: 0 cobalt, 1 vermilion, 2 violet, 3 electric yellow */
 var MIXES4 = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1],[0,0,0,1],[1,0,0.2,0],[0.1,1,0,0.1],[0,0.1,1,0],[0,0,0.1,1],[1,0,0,0.1]];
+/* Klee: 0 turquoise, 1 pastel pink, 2 lavender, 3 golden yellow (soft neighbours that glow together) */
+var MIXES5 = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1],[1,0,0,0.4],[0,1,0,0.5],[0,0.4,1,0],[0.5,0,1,0],[0,0.3,0,1],[1,0,0.3,0]];
 var MIXES2 = [[1,0,0.5,0],[0.4,0,1,0],[0,0,1,0.45],[0,0,0.35,1],[0.25,0,0.7,0.55],[0,0.55,0,1],
               [1,0,0.2,0.12],[0.65,0,0.85,0.15],[0,0.12,0.35,1],[0.9,0,1,0]];
 
@@ -359,28 +361,33 @@ var MIXES2 = [[1,0,0.5,0],[0.4,0,1,0],[0,0,1,0.45],[0,0,0.35,1],[0.25,0,0.7,0.55
 var LEVELS = [
  { n: 1, name: 'Watercolor Sky', by: 'a dreamy watercolor', need: 0, mixes: MIXES,
    pal: [[0.15,0.18,0.78],[0.56,0.22,0.80],[0.10,0.66,0.90],[0.74,0.58,0.22]],
-   bg: [[0.028,0.024,0.05],[0.17,0.16,0.21],[0.16,0.07,0.24]], lum: [0.88,0.82,0.99], vg: 0, mt: 0, kd: 0, amp: 14, vort: 5.5, whirl: 0, doodles: null, drift: null,
+   bg: [[0.028,0.024,0.05],[0.17,0.16,0.21],[0.16,0.07,0.24]], lum: [0.88,0.82,0.99], vg: 0, mt: 0, kd: 0, kl: 0, amp: 14, vort: 5.5, whirl: 0, doodles: null, drift: null,
    card: ['#2c33c7','#8f38cc','#1aa8e6','#bd9438','#6a2fb0','#2a7fd4'],
    enter: 'The sky is softening back into watercolor...', arrive: 'Level 1 \u00b7 Watercolor Sky' },
  { n: 2, name: 'The Starry Sky', by: 'after Vincent van Gogh', need: 8, mixes: MIXES2,
    pal: [[0.10,0.26,0.86],[0.96,0.50,0.12],[0.36,0.78,0.84],[0.99,0.84,0.28]],
-   bg: [[0.025,0.05,0.17],[0.11,0.21,0.47],[0.03,0.13,0.25]], lum: [1.0,0.96,0.74], vg: 1, mt: 0, kd: 0, amp: 22, vort: 10, whirl: 1, doodles: [0, 7, 7, 2], drift: [1, 2, 0.03],
+   bg: [[0.025,0.05,0.17],[0.11,0.21,0.47],[0.03,0.13,0.25]], lum: [1.0,0.96,0.74], vg: 1, mt: 0, kd: 0, kl: 0, amp: 22, vort: 10, whirl: 1, doodles: [0, 7, 7, 2], drift: [1, 2, 0.03],
    card: ['#1f3fbf','#f0a43a','#5fc4d6','#f6d24a','#2a58c9','#e8862a'],
    enter: 'The sky is beginning to dream like Vincent van Gogh...', arrive: 'Level 2 \u00b7 The Starry Sky. New shapes are hiding in the swirls.' },
  { n: 3, name: 'The Red Room', by: 'after Henri Matisse', need: 8, mixes: MIXES3,
    pal: [[0.07,0.20,0.80],[0.98,0.36,0.60],[0.04,0.60,0.36],[1.0,0.70,0.10]],
-   bg: [[0.56,0.05,0.06],[0.80,0.13,0.09],[0.09,0.15,0.62]], lum: [1.0,0.97,0.9], vg: 0, mt: 1, kd: 0, amp: 15, vort: 3.5, whirl: 0, doodles: [4, 2, 4, 1], drift: null,
+   bg: [[0.56,0.05,0.06],[0.80,0.13,0.09],[0.09,0.15,0.62]], lum: [1.0,0.97,0.9], vg: 0, mt: 1, kd: 0, kl: 0, amp: 15, vort: 3.5, whirl: 0, doodles: [4, 2, 4, 1], drift: null,
    card: ['#1f3fbf','#f0528a','#14a05f','#ff9d1a','#d42a2a','#2a58c9'],
    enter: 'The sky is turning into bold cut-paper colors, like Henri Matisse...', arrive: 'Level 3 \u00b7 The Red Room. New cut-out shapes are floating by.' },
  { n: 4, name: 'Composition in the Sky', by: 'after Wassily Kandinsky', need: 8, mixes: MIXES4, light: true, pen: '#1b1826',
    pal: [[0.12,0.26,0.78],[0.90,0.16,0.13],[0.50,0.22,0.70],[0.99,0.84,0.08]],
-   bg: [[0.90,0.86,0.75],[0.97,0.95,0.88],[0.80,0.85,0.90]], lum: [1.0,0.98,0.92], vg: 0, mt: 0, kd: 1, amp: 17, vort: 6, whirl: 0, doodles: [3, 5, 5, 1, 6, 7], drift: null,
+   bg: [[0.90,0.86,0.75],[0.97,0.95,0.88],[0.80,0.85,0.90]], lum: [1.0,0.98,0.92], vg: 0, mt: 0, kd: 1, kl: 0, amp: 17, vort: 6, whirl: 0, doodles: [3, 5, 5, 1, 6, 7], drift: null,
    card: ['#1f42c7','#e5291f','#8038b3','#fbd512','#1b1826','#2a8ad4'],
-   enter: 'The sky is turning into music and shapes, like Wassily Kandinsky...', arrive: 'Level 4 \u00b7 Composition in the Sky. Listen for the new shapes.' }
+   enter: 'The sky is turning into music and shapes, like Wassily Kandinsky...', arrive: 'Level 4 \u00b7 Composition in the Sky. Listen for the new shapes.' },
+ { n: 5, name: 'The Imaginary Map', by: 'after Paul Klee', need: 8, mixes: MIXES5,
+   pal: [[0.30,0.70,0.72],[0.94,0.60,0.62],[0.66,0.58,0.84],[0.96,0.76,0.30]],
+   bg: [[0.42,0.27,0.22],[0.66,0.50,0.34],[0.36,0.30,0.42]], lum: [1.0,0.95,0.86], vg: 0, mt: 0, kd: 0, kl: 1, amp: 13, vort: 4, whirl: 0, doodles: [1, 3, 8, 4], drift: null,
+   card: ['#4cb3b8','#ef9a9e','#a894d6','#f4c24c','#a8603f','#7fb08a'],
+   enter: 'The sky is turning into an imaginary map, like Paul Klee...', arrive: 'Level 5 \u00b7 The Imaginary Map. Curious little things are hiding in the squares.' }
 ];
 var level = 1, unl = 1, lvT = 1, lvDur = 60, lvFrom = null, lvArrived = true;
 function LV(){ return LEVELS[level - 1]; }
-var KNOBS = ['vg', 'mt', 'kd', 'amp', 'vort', 'whirl'];
+var KNOBS = ['vg', 'mt', 'kd', 'kl', 'amp', 'vort', 'whirl'];
 function cpCfg(c){
   var o = { pal: [c.pal[0].slice(), c.pal[1].slice(), c.pal[2].slice(), c.pal[3].slice()], bg: [c.bg[0].slice(), c.bg[1].slice(), c.bg[2].slice()], lum: c.lum.slice() };
   for (var k = 0; k < KNOBS.length; k++) o[KNOBS[k]] = c[KNOBS[k]];
@@ -637,7 +644,49 @@ SH.push(
   p.push([-0.6,0.36,-0.6,0.36,0.17],[0.6,0.36,0.6,0.36,0.17]);
   SH.push({id:'rainbow', label:'a rainbow', cats:['art','geo'], sym:1, parts:p, eyes:[]});
 })();
-for (si = 0; si < SH.length; si++){ if (!SH[si].lv) SH[si].lv = 4; SH[si].idx = si; }
+for (si = 0; si < SH.length; si++) if (!SH[si].lv) SH[si].lv = 4;
+
+/* ---- level 5: after Paul Klee (imaginary maps, whimsical machines, symbols) ---- */
+SH.push(
+ {id:'goldfish2', label:'a golden fish', cats:['swim'], parts:[[-0.5,0,0.3,0,0.3],[0.35,0,0.8,-0.42,0.12],[0.35,0,0.8,0.42,0.12],[0.8,-0.42,0.8,0.42,0.06],
+   [-0.2,-0.28,-0.05,-0.56,0.05],[0.02,-0.28,0.17,-0.52,0.05],[-0.1,0.28,0.05,0.5,0.05]], eyes:[[-0.55,-0.06,0.08]], goldEye:1},
+ {id:'twitter', label:'a twittering machine', cats:['whimsy','fly'], parts:[[-0.86,0.05,0.64,0.05,0.04],[0.64,0.05,0.64,0.42,0.04],[0.64,0.42,0.88,0.42,0.05],[-0.1,0.05,-0.1,0.72,0.04],[-0.55,0.74,0.35,0.74,0.05],
+   [-0.6,-0.1,-0.6,-0.1,0.11],[-0.64,-0.32,-0.64,-0.32,0.08],[-0.64,-0.36,-0.86,-0.56,0.03],
+   [-0.25,-0.1,-0.25,-0.1,0.11],[-0.2,-0.32,-0.2,-0.32,0.08],[-0.2,-0.36,-0.08,-0.62,0.03],
+   [0.1,-0.1,0.1,-0.1,0.11],[0.06,-0.32,0.06,-0.32,0.08],[0.06,-0.36,-0.14,-0.5,0.03],
+   [0.42,-0.1,0.42,-0.1,0.11],[0.46,-0.32,0.46,-0.32,0.08],[0.46,-0.36,0.64,-0.6,0.03]], eyes:[]},
+ {id:'arrow', label:'an arrow', cats:['map'], parts:[[0.86,0,-0.3,0,0.1],[-0.3,-0.42,-0.86,0,0.09],[-0.3,0.42,-0.86,0,0.09],[-0.3,-0.42,-0.3,0.42,0.09],[-0.5,0,-0.5,0,0.18]], eyes:[]},
+ {id:'walker', label:'a tightrope walker', cats:['whimsy'], parts:[[-0.9,0.56,0.9,0.46,0.035],[0,0.1,-0.12,0.5,0.05],[0,0.1,0.12,0.5,0.05],[0,-0.35,0,0.1,0.1],[0,-0.58,0,-0.58,0.12],
+   [-0.86,-0.14,0.86,-0.3,0.035],[0,-0.25,-0.4,-0.2,0.04],[0,-0.25,0.4,-0.27,0.04]], eyes:[]},
+ {id:'house', label:'a little house', cats:['home'], sym:1, parts:[[-0.25,0,-0.25,0.45,0.17],[0.25,0,0.25,0.45,0.17],[-0.25,0,0.25,0,0.17],[-0.25,0.45,0.25,0.45,0.17],
+   [-0.56,-0.12,0,-0.7,0.08],[0.56,-0.12,0,-0.7,0.08],[-0.56,-0.12,0.56,-0.12,0.08],[0,-0.3,0,-0.3,0.2],[0.3,-0.42,0.3,-0.72,0.06],
+   [0,0.44,0,0.6,0.1,1],[-0.22,0.1,-0.22,0.1,0.09,1]], eyes:[]},
+ {id:'key', label:'a key', cats:['map'], parts:[[-0.55,0,-0.55,0,0.3],[-0.55,0,-0.55,0,0.13,1],[-0.28,0,0.86,0,0.07],[0.55,0,0.55,0.26,0.06],[0.76,0,0.76,0.32,0.06]], eyes:[]},
+ {id:'balloon', label:'a hot-air balloon', cats:['travel','whimsy'], sym:1, parts:[[0,-0.38,0,-0.38,0.46],[0,-0.1,0,0.14,0.2],[-0.15,0.18,-0.12,0.56,0.03],[0.15,0.18,0.12,0.56,0.03],[-0.15,0.66,0.15,0.66,0.1]], eyes:[]},
+ {id:'umbrella', label:'an umbrella', cats:['whimsy'], sym:1, parts:[[-0.56,-0.06,0.56,-0.06,0.1],[0,-0.32,0,-0.32,0.38],[-0.3,-0.2,-0.3,-0.2,0.26],[0.3,-0.2,0.3,-0.2,0.26],
+   [-0.5,-0.02,-0.5,-0.02,0.1],[-0.17,-0.02,-0.17,-0.02,0.1],[0.17,-0.02,0.17,-0.02,0.1],[0.5,-0.02,0.5,-0.02,0.1],
+   [0,0,0,0.66,0.05],[0,0.66,0.18,0.82,0.05],[0.18,0.82,0.32,0.68,0.05],[0,-0.68,0,-0.88,0.04]], eyes:[]},
+ {id:'snail', label:'a snail', cats:['slow'], parts:[[0.12,-0.08,0.12,-0.08,0.38],[-0.76,0.34,0.58,0.34,0.1],[-0.6,0.32,-0.68,-0.04,0.08],[-0.68,-0.04,-0.82,-0.4,0.03],[-0.62,-0.04,-0.54,-0.4,0.03],
+   [-0.82,-0.42,-0.82,-0.42,0.05],[-0.54,-0.42,-0.54,-0.42,0.05]], eyes:[]},
+ {id:'lighthouse', label:'a lighthouse', cats:['map','home'], parts:[[-0.2,0.76,-0.12,-0.3,0.08],[0.2,0.76,0.12,-0.3,0.08],[0,-0.2,0,0.7,0.16],[-0.38,0.82,0.38,0.82,0.08],[-0.26,-0.36,0.26,-0.36,0.06],
+   [0,-0.5,0,-0.5,0.13],[0,-0.66,0,-0.72,0.1],[-0.14,-0.52,-0.86,-0.74,0.045],[0.14,-0.52,0.86,-0.3,0.045]], eyes:[]}
+);
+(function(){
+  var p = [], i, x, y, px, py, a;
+  /* an eye: two lid arcs around an iris with a dark pupil */
+  for (var lid = -1; lid <= 1; lid += 2){
+    px = null;
+    for (i = 0; i <= 8; i++){ x = -0.86 + i / 8 * 1.72; y = lid * 0.46 * (1 - (x / 0.86) * (x / 0.86)); if (px !== null) p.push([px, py, x, y, 0.06]); px = x; py = y; }
+  }
+  p.push([0,0,0,0,0.3],[0,0,0,0,0.11,1]);
+  SH.push({id:'eye', label:'an eye', cats:['face','map'], sym:1, parts:p, eyes:[]});
+  /* compass rose: four long points, four short ones, a ring */
+  p = [[0,0,0,0,0.12]];
+  for (i = 0; i < 4; i++){ a = i / 4 * 6.2832; p.push([0, 0, Math.cos(a) * 0.86, Math.sin(a) * 0.86, 0.08]); p.push([0, 0, Math.cos(a + 0.785) * 0.46, Math.sin(a + 0.785) * 0.46, 0.06]); }
+  for (i = 0; i < 16; i++){ a = i / 16 * 6.2832; var b2 = (i + 1) / 16 * 6.2832; p.push([Math.cos(a) * 0.58, Math.sin(a) * 0.58, Math.cos(b2) * 0.58, Math.sin(b2) * 0.58, 0.035]); }
+  SH.push({id:'compass', label:'a compass rose', cats:['map'], sym:1, parts:p, eyes:[[0,0,0.1]], goldEye:1});
+})();
+for (si = 0; si < SH.length; si++){ if (!SH[si].lv) SH[si].lv = 5; SH[si].idx = si; }
 function pickShape(){
   var all = [], fresh = [];
   for (var i = 0; i < SH.length; i++){ if (SH[i].lv <= level) all.push(SH[i]); if (SH[i].lv === level) fresh.push(SH[i]); }
@@ -854,7 +903,11 @@ var CATS = [
  {k:'geo', q:'Look for something made of simple shapes.', lv:4},
  {k:'rider', q:'A blue rider is galloping across the sky.', lv:4},
  {k:'moscow', q:'Something from old Moscow has golden domes and bells.', lv:4},
- {k:'art', q:'Something a painter would love is floating by.', lv:4}
+ {k:'art', q:'Something a painter would love is floating by.', lv:4},
+ {k:'map', q:'Something from an imaginary map is drifting by.', lv:5},
+ {k:'whimsy', q:'Something curious and a little silly is up there.', lv:5},
+ {k:'home', q:'Someone\'s little home is floating in the sky.', lv:5},
+ {k:'slow', q:'Something slow and curly is taking its time up there.', lv:5}
 ];
 var cur = null, nextPrompt = 9, lastCat = '', promptFadeT = 0;
 var promptEl = DOC.getElementById('prompt');
@@ -1217,7 +1270,7 @@ var FS = [
 'varying vec2 vUv;',
 'uniform sampler2D uPig;uniform sampler2D uNoise;',
 'uniform float uAsp;uniform float uT;uniform float uGy;uniform vec2 uHalf;',
-'uniform vec3 uC0;uniform vec3 uC1;uniform vec3 uC2;uniform vec3 uC3;uniform vec3 uB0;uniform vec3 uB1;uniform vec3 uB2;uniform vec3 uLum;uniform float uVG;uniform float uMT;uniform float uKD;',
+'uniform vec3 uC0;uniform vec3 uC1;uniform vec3 uC2;uniform vec3 uC3;uniform vec3 uB0;uniform vec3 uB1;uniform vec3 uB2;uniform vec3 uLum;uniform float uVG;uniform float uMT;uniform float uKD;uniform float uKL;',
 'float h21(vec2 q){return fract(sin(dot(q,vec2(127.1,311.7)))*43758.5453);}',
 'float sum4(vec4 v){return v.r+v.g+v.b+v.a;}',
 'float sg(vec2 q,vec2 a,vec2 b){vec2 pa=q-a;vec2 ba=b-a;float h=clamp(dot(pa,ba)/dot(ba,ba),0.0,1.0);return length(pa-ba*h);}',
@@ -1338,8 +1391,38 @@ var FS = [
 '  bgK*=0.975+0.04*gr;',
 '  bg=mix(bg,bgK,uKD);col=mix(col,tcol,uKD);a=mix(a,at,uKD);',
 ' }',
+' if(uKL>0.001){',
+/* clouds become patchworks of little squares, each with its own shade and soft gradient */
+'  vec2 lq=vec2(uv.x,uv.y*uAsp);float KK=15.0;vec2 sq=lq*KK;vec2 sc0=floor(sq);vec2 sf=fract(sq);vec2 scq=(sc0+0.5)/KK;',
+'  vec4 Ps=texture2D(uPig,vec2(scq.x,(scq.y/uAsp)*uGy)+uHalf)*1.275;float ss=sum4(Ps);',
+'  vec4 Sn=Ps/max(max(max(Ps.r,Ps.g),max(Ps.b,Ps.a)),0.0001);vec4 S2=Sn*Sn;S2=S2*S2;',
+'  vec3 scol=(S2.r*uC0+S2.g*uC1+S2.b*uC2+S2.a*uC3)/max(sum4(S2),0.0001);',
+'  float hk=h21(sc0+17.0);scol=mix(scol,mix(scol,uC3,0.4),step(0.82,hk));',
+'  scol*=(0.92+0.26*hk)*(0.92+0.14*(1.0-sf.y));',
+'  float ef=min(min(sf.x,1.0-sf.x),min(sf.y,1.0-sf.y));scol*=1.0-0.22*smoothstep(0.1,0.0,ef);',
+'  scol=mix(scol,col,0.12);',
+'  float as=smoothstep(0.1,0.2,ss)*0.96;',
+/* the map: an earthy patchwork with little drawn symbols, a dashed route and a red sun */
+'  vec2 bq=lq*4.0;bq.x+=h21(vec2(floor(bq.y),3.0))*0.9;vec2 bc=floor(bq);vec2 bf=fract(bq);float hb=h21(bc+31.0);float hb2=h21(bc+41.0);',
+'  vec3 bgL=mix(uB0,uB1,0.25+0.5*hb)*0.88;',
+'  vec3 tnt=hb2<0.25?uC0:(hb2<0.5?uC1:(hb2<0.75?uC2:uC3));bgL=mix(bgL,tnt*0.7,0.22*step(0.6,h21(bc+51.0)));',
+'  bgL*=(0.92+0.12*(1.0-bf.y)*hb)*(0.95+0.06*gr);',
+'  float bef=min(min(bf.x,1.0-bf.x),min(bf.y,1.0-bf.y));bgL*=1.0-0.2*smoothstep(0.035,0.0,bef);',
+'  vec2 m=bf-0.5;float ty=floor(h21(bc+5.0)*11.0);float sd2=1.0;',
+'  if(ty<1.0)sd2=max(min(abs(m.x),abs(m.y)),max(abs(m.x),abs(m.y))-0.11);',
+'  else if(ty<2.0)sd2=abs(length(m)-0.1);',
+'  else if(ty<3.0)sd2=min(sg(m,vec2(0.0,0.14),vec2(0.0,-0.14)),min(sg(m,vec2(0.0,-0.14),vec2(-0.07,-0.06)),sg(m,vec2(0.0,-0.14),vec2(0.07,-0.06))));',
+'  else if(ty<4.0)sd2=min(length(m-vec2(-0.09,0.04)),min(length(m-vec2(0.0,-0.05)),length(m-vec2(0.09,0.04))))-0.018;',
+'  else if(ty<5.0)sd2=abs(max(abs(m.x)*0.866+m.y*0.5,-m.y)-0.06);',
+'  vec3 INK2=vec3(0.2,0.12,0.1);bgL=mix(bgL,INK2,smoothstep(0.02,0.01,sd2)*0.55);',
+'  float ry=0.5*uAsp+0.22*sin(lq.x*5.0+1.3)+0.08*sin(lq.x*13.0);float dr=abs(lq.y-ry);',
+'  bgL=mix(bgL,INK2,smoothstep(0.005,0.002,dr)*step(0.45,fract(lq.x*22.0))*0.75);',
+'  float dsun=length(lq-vec2(0.78,0.17+0.01*sin(uT*0.3)));',
+'  bgL=mix(bgL,vec3(0.92,0.33,0.18),smoothstep(0.092,0.085,dsun));',
+'  bg=mix(bg,bgL,uKL);col=mix(col,scol,uKL);a=mix(a,as,uKL);',
+' }',
 ' vec3 o=mix(bg,col,a*0.95);',
-' float thin=smoothstep(0.0,0.06,s)*(1.0-a)*(1.0-max(uMT,uKD));',
+' float thin=smoothstep(0.0,0.06,s)*(1.0-a)*(1.0-max(max(uMT,uKD),uKL));',
 ' o=mix(o,bg*0.55+cc*0.3,thin*0.55);',
 ' float pa=texture2D(uNoise,p*8.0+vec2(0.37,0.11)).g;',
 ' o*=mix(0.9+0.13*pa,0.975+0.04*pa,uKD);',
@@ -1384,7 +1467,7 @@ function initGL(){
   var buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
   var al = gl.getAttribLocation(prog, 'a'); gl.enableVertexAttribArray(al); gl.vertexAttribPointer(al, 2, gl.FLOAT, false, 0, 0);
-  var names = ['uPig','uNoise','uAsp','uT','uGy','uHalf','uC0','uC1','uC2','uC3','uB0','uB1','uB2','uLum','uVG','uMT','uKD'], i;
+  var names = ['uPig','uNoise','uAsp','uT','uGy','uHalf','uC0','uC1','uC2','uC3','uB0','uB1','uB2','uLum','uVG','uMT','uKD','uKL'], i;
   for (i = 0; i < names.length; i++) U[names[i]] = gl.getUniformLocation(prog, names[i]);
   var NS = 256, r = tileNoise(NS, 8, 11), g = tileNoise(NS, 16, 23), b = tileNoise(NS, 32, 37), a = tileNoise(NS, 64, 51), nd = new Uint8Array(NS * NS * 4);
   for (i = 0; i < NS * NS; i++){ nd[i*4] = r[i] * 255; nd[i*4+1] = g[i] * 255; nd[i*4+2] = b[i] * 255; nd[i*4+3] = a[i] * 255; }
@@ -1415,7 +1498,7 @@ function render(){
     gl.uniform2f(U.uHalf, 0.5 / NX, 0.5 / NY);
     gl.uniform3fv(U.uC0, vis.pal[0]); gl.uniform3fv(U.uC1, vis.pal[1]); gl.uniform3fv(U.uC2, vis.pal[2]); gl.uniform3fv(U.uC3, vis.pal[3]);
     gl.uniform3fv(U.uB0, vis.bg[0]); gl.uniform3fv(U.uB1, vis.bg[1]); gl.uniform3fv(U.uB2, vis.bg[2]);
-    gl.uniform3fv(U.uLum, vis.lum); gl.uniform1f(U.uVG, vis.vg); gl.uniform1f(U.uMT, vis.mt); gl.uniform1f(U.uKD, vis.kd);
+    gl.uniform3fv(U.uLum, vis.lum); gl.uniform1f(U.uVG, vis.vg); gl.uniform1f(U.uMT, vis.mt); gl.uniform1f(U.uKD, vis.kd); gl.uniform1f(U.uKL, vis.kl);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   } else if (fallback){
     var img = fallback.img, px = img.data, cols = [], b0 = vis.bg[0];
