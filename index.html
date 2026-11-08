@@ -46,6 +46,7 @@ canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
 #intro .go{margin-top:38px;font-size:20px;animation:breathe 2.6s ease-in-out infinite}
 @keyframes breathe{0%,100%{opacity:0.45}50%{opacity:1}}
 @media (prefers-reduced-motion:reduce){#intro .go{animation:none;opacity:0.85}}
+body.light #prompt{color:#1b1826;text-shadow:0 1px 10px rgba(255,250,235,0.95),0 0 3px rgba(255,250,235,0.9)}
 #book{position:absolute;z-index:9;left:0;top:0;right:0;bottom:0;background:rgba(7,6,14,0.9);color:#f3efff;display:none;
  overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
 #bookIn{padding:20px 18px 40px 18px;padding-top:calc(env(safe-area-inset-top) + 18px);padding-bottom:calc(env(safe-area-inset-bottom) + 30px);max-width:520px;margin:0 auto}
@@ -348,6 +349,8 @@ var MIXES = [[1,0.25,0,0],[0.25,1,0,0],[0,0.2,1,0],[0.55,0,0.85,0],[0.7,0.7,0,0]
 /* Van Gogh: 0 electric blue, 1 fiery orange, 2 turquoise, 3 chrome yellow (mostly blues, gold swirls, a little fire) */
 /* Matisse: 0 ultramarine, 1 hot pink, 2 emerald, 3 marigold (pure, unmixed colors) */
 var MIXES3 = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1],[1,0.12,0,0],[0,0,1,0.12],[0.08,1,0,0],[0,0,0.08,1],[1,0,0,0],[0,0,1,0]];
+/* Kandinsky: 0 cobalt, 1 vermilion, 2 violet, 3 electric yellow */
+var MIXES4 = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1],[0,0,0,1],[1,0,0.2,0],[0.1,1,0,0.1],[0,0.1,1,0],[0,0,0.1,1],[1,0,0,0.1]];
 var MIXES2 = [[1,0,0.5,0],[0.4,0,1,0],[0,0,1,0.45],[0,0,0.35,1],[0.25,0,0.7,0.55],[0,0.55,0,1],
               [1,0,0.2,0.12],[0.65,0,0.85,0.15],[0,0.12,0.35,1],[0.9,0,1,0]];
 
@@ -356,23 +359,28 @@ var MIXES2 = [[1,0,0.5,0],[0.4,0,1,0],[0,0,1,0.45],[0,0,0.35,1],[0.25,0,0.7,0.55
 var LEVELS = [
  { n: 1, name: 'Watercolor Sky', by: 'a dreamy watercolor', need: 0, mixes: MIXES,
    pal: [[0.15,0.18,0.78],[0.56,0.22,0.80],[0.10,0.66,0.90],[0.74,0.58,0.22]],
-   bg: [[0.028,0.024,0.05],[0.17,0.16,0.21],[0.16,0.07,0.24]], lum: [0.88,0.82,0.99], vg: 0, mt: 0, amp: 14, vort: 5.5, whirl: 0, doodles: null, drift: null,
+   bg: [[0.028,0.024,0.05],[0.17,0.16,0.21],[0.16,0.07,0.24]], lum: [0.88,0.82,0.99], vg: 0, mt: 0, kd: 0, amp: 14, vort: 5.5, whirl: 0, doodles: null, drift: null,
    card: ['#2c33c7','#8f38cc','#1aa8e6','#bd9438','#6a2fb0','#2a7fd4'],
    enter: 'The sky is softening back into watercolor...', arrive: 'Level 1 \u00b7 Watercolor Sky' },
  { n: 2, name: 'The Starry Sky', by: 'after Vincent van Gogh', need: 8, mixes: MIXES2,
    pal: [[0.10,0.26,0.86],[0.96,0.50,0.12],[0.36,0.78,0.84],[0.99,0.84,0.28]],
-   bg: [[0.025,0.05,0.17],[0.11,0.21,0.47],[0.03,0.13,0.25]], lum: [1.0,0.96,0.74], vg: 1, mt: 0, amp: 22, vort: 10, whirl: 1, doodles: [0, 7, 7, 2], drift: [1, 2, 0.03],
+   bg: [[0.025,0.05,0.17],[0.11,0.21,0.47],[0.03,0.13,0.25]], lum: [1.0,0.96,0.74], vg: 1, mt: 0, kd: 0, amp: 22, vort: 10, whirl: 1, doodles: [0, 7, 7, 2], drift: [1, 2, 0.03],
    card: ['#1f3fbf','#f0a43a','#5fc4d6','#f6d24a','#2a58c9','#e8862a'],
    enter: 'The sky is beginning to dream like Vincent van Gogh...', arrive: 'Level 2 \u00b7 The Starry Sky. New shapes are hiding in the swirls.' },
  { n: 3, name: 'The Red Room', by: 'after Henri Matisse', need: 8, mixes: MIXES3,
    pal: [[0.07,0.20,0.80],[0.98,0.36,0.60],[0.04,0.60,0.36],[1.0,0.70,0.10]],
-   bg: [[0.56,0.05,0.06],[0.80,0.13,0.09],[0.09,0.15,0.62]], lum: [1.0,0.97,0.9], vg: 0, mt: 1, amp: 15, vort: 3.5, whirl: 0, doodles: [4, 2, 4, 1], drift: null,
+   bg: [[0.56,0.05,0.06],[0.80,0.13,0.09],[0.09,0.15,0.62]], lum: [1.0,0.97,0.9], vg: 0, mt: 1, kd: 0, amp: 15, vort: 3.5, whirl: 0, doodles: [4, 2, 4, 1], drift: null,
    card: ['#1f3fbf','#f0528a','#14a05f','#ff9d1a','#d42a2a','#2a58c9'],
-   enter: 'The sky is turning into bold cut-paper colors, like Henri Matisse...', arrive: 'Level 3 \u00b7 The Red Room. New cut-out shapes are floating by.' }
+   enter: 'The sky is turning into bold cut-paper colors, like Henri Matisse...', arrive: 'Level 3 \u00b7 The Red Room. New cut-out shapes are floating by.' },
+ { n: 4, name: 'Composition in the Sky', by: 'after Wassily Kandinsky', need: 8, mixes: MIXES4, light: true, pen: '#1b1826',
+   pal: [[0.12,0.26,0.78],[0.90,0.16,0.13],[0.50,0.22,0.70],[0.99,0.84,0.08]],
+   bg: [[0.90,0.86,0.75],[0.97,0.95,0.88],[0.80,0.85,0.90]], lum: [1.0,0.98,0.92], vg: 0, mt: 0, kd: 1, amp: 17, vort: 6, whirl: 0, doodles: [3, 5, 5, 1, 6, 7], drift: null,
+   card: ['#1f42c7','#e5291f','#8038b3','#fbd512','#1b1826','#2a8ad4'],
+   enter: 'The sky is turning into music and shapes, like Wassily Kandinsky...', arrive: 'Level 4 \u00b7 Composition in the Sky. Listen for the new shapes.' }
 ];
 var level = 1, unl = 1, lvT = 1, lvDur = 60, lvFrom = null, lvArrived = true;
 function LV(){ return LEVELS[level - 1]; }
-var KNOBS = ['vg', 'mt', 'amp', 'vort', 'whirl'];
+var KNOBS = ['vg', 'mt', 'kd', 'amp', 'vort', 'whirl'];
 function cpCfg(c){
   var o = { pal: [c.pal[0].slice(), c.pal[1].slice(), c.pal[2].slice(), c.pal[3].slice()], bg: [c.bg[0].slice(), c.bg[1].slice(), c.bg[2].slice()], lum: c.lum.slice() };
   for (var k = 0; k < KNOBS.length; k++) o[KNOBS[k]] = c[KNOBS[k]];
@@ -392,7 +400,13 @@ function updateLevel(dt){
     var a = D[to.drift[0]], b = D[to.drift[1]], f = to.drift[2] * dt;
     for (var i = 0; i < N; i++){ var q = a[i] * f; a[i] -= q; b[i] += q; }
   }
+  if (lvT >= 0.5 && penLv !== level) applyPen();
   if (lvT >= 1 && !lvArrived){ lvArrived = true; setPrompt(to.arrive, 6); }
+}
+var penLv = 0, LIGHT = false, CARDPEN = '#f3efff';
+function applyPen(){
+  var L = LV(); penLv = level; LIGHT = !!L.light; PEN = L.pen || '#f3efff';
+  DOC.body.className = LIGHT ? 'light' : '';
 }
 function goLevel(n, dur){
   if (n < 1 || n > unl) return;
@@ -584,7 +598,46 @@ SH.push(
   for (i = 0; i < tips.length; i++) p.push([tips[i][0], tips[i][1], tips[i][0], tips[i][1], 0.11]);
   SH.push({id:'coral', label:'a coral branch', cats:['sea','tropic'], parts:p, eyes:[]});
 })();
-for (si = 0; si < SH.length; si++){ if (!SH[si].lv) SH[si].lv = 3; SH[si].idx = si; }
+for (si = 0; si < SH.length; si++) if (!SH[si].lv) SH[si].lv = 3;
+
+/* ---- level 4: after Wassily Kandinsky (music, geometry, the blue rider) ---- */
+SH.push(
+ {id:'trumpet', label:'a trumpet', cats:['music'], parts:[[-0.82,-0.24,-0.82,0.24,0.07],[-0.82,-0.2,-0.28,0,0.07],[-0.82,0.2,-0.28,0,0.07],[-0.66,0,-0.66,0,0.15],
+   [-0.28,0,0.7,0,0.06],[0.1,0,0.1,0.32,0.05],[0.1,0.32,0.62,0.32,0.05],[0.62,0.32,0.62,0,0.05],
+   [0.26,-0.04,0.26,-0.3,0.045],[0.39,-0.04,0.39,-0.3,0.045],[0.52,-0.04,0.52,-0.3,0.045],[0.7,0,0.86,0,0.07]], eyes:[]},
+ {id:'drum', label:'a drum', cats:['music'], sym:1, parts:[[-0.42,0.22,0.42,0.22,0.36],[-0.16,-0.18,-0.68,-0.84,0.045],[0.16,-0.18,0.68,-0.84,0.045],
+   [-0.68,-0.84,-0.68,-0.84,0.075],[0.68,-0.84,0.68,-0.84,0.075]], eyes:[]},
+ {id:'notes', label:'a pair of music notes', cats:['music'], parts:[[-0.42,0.52,-0.42,0.52,0.17],[0.38,0.38,0.38,0.38,0.17],[-0.27,0.48,-0.27,-0.58,0.05],[0.53,0.34,0.53,-0.72,0.05],[-0.27,-0.6,0.53,-0.74,0.1]], eyes:[]},
+ {id:'metronome', label:'a metronome', cats:['music','geo'], sym:1, parts:[[-0.46,0.74,-0.16,-0.66,0.08],[0.46,0.74,0.16,-0.66,0.08],[-0.5,0.74,0.5,0.74,0.08],[0,-0.4,0,0.5,0.2],[-0.22,0.5,0.22,0.5,0.2],
+   [0,0.5,0.36,-0.86,0.04],[0.26,-0.48,0.26,-0.48,0.085]], eyes:[]},
+ {id:'triangle', label:'a musical triangle', cats:['music','geo'], parts:[[-0.56,0.5,0.56,0.5,0.06],[-0.56,0.5,-0.06,-0.4,0.06],[0.56,0.5,0.08,-0.38,0.06],[0.01,-0.48,0.01,-0.86,0.03],[0.34,-0.18,0.86,-0.56,0.04]], eyes:[]},
+ {id:'bell', label:'a bell', cats:['music','moscow'], sym:1, parts:[[0,-0.34,0,-0.34,0.32],[0,-0.1,0,0.34,0.36],[-0.3,-0.2,-0.52,0.46,0.12],[0.3,-0.2,0.52,0.46,0.12],[-0.62,0.52,0.62,0.52,0.08],
+   [0,0.6,0,0.72,0.1],[0,-0.68,0,-0.88,0.07]], eyes:[]},
+ {id:'rider', label:'a blue rider', cats:['rider'], parts:[[-0.25,0.05,0.4,0.05,0.2],[-0.3,0,-0.55,-0.4,0.1],[-0.55,-0.42,-0.82,-0.3,0.09],[-0.55,-0.5,-0.52,-0.64,0.04],
+   [-0.2,0.2,-0.56,0.55,0.06],[-0.14,0.2,-0.3,0.76,0.06],[0.36,0.2,0.66,0.62,0.06],[0.3,0.2,0.3,0.78,0.06],[0.56,-0.04,0.9,0.26,0.06],
+   [0,-0.15,0.05,-0.55,0.1],[0.03,-0.74,0.03,-0.74,0.1],[0.05,-0.5,0.42,-0.3,0.06]], eyes:[[-0.72,-0.38,0.03]]},
+ {id:'kite', label:'a kite', cats:['geo'], parts:[[0,-0.82,0.46,-0.22,0.07],[0.46,-0.22,0,0.38,0.07],[0,0.38,-0.46,-0.22,0.07],[-0.46,-0.22,0,-0.82,0.07],[-0.46,-0.22,0.46,-0.22,0.05],[0,-0.82,0,0.38,0.05],
+   [0,0.38,0.16,0.58,0.035],[0.16,0.58,-0.04,0.76,0.035],[-0.04,0.76,0.14,0.94,0.035],[0.1,0.6,0.1,0.6,0.065],[-0.02,0.8,-0.02,0.8,0.065]], eyes:[]},
+ {id:'top', label:'a spinning top', cats:['geo'], sym:1, parts:[[-0.5,-0.15,0.5,-0.15,0.14],[-0.42,-0.1,0,0.64,0.1],[0.42,-0.1,0,0.64,0.1],[0,0,0,0.32,0.25],[0,0.64,0,0.84,0.04],[0,-0.3,0,-0.76,0.07]], eyes:[]},
+ {id:'church', label:'an onion-domed church', cats:['moscow'], sym:1, parts:[[0,-0.42,0,-0.42,0.27],[0,-0.6,0,-0.86,0.05],[-0.1,-0.78,0.1,-0.78,0.035],[0,-0.12,0,0.3,0.19],
+   [-0.62,0.56,0.62,0.56,0.22],[-0.56,0.08,-0.56,0.08,0.13],[0.56,0.08,0.56,0.08,0.13],[-0.56,0.2,-0.56,0.42,0.1],[0.56,0.2,0.56,0.42,0.1],[0,0.58,0,0.74,0.09,1]], eyes:[]},
+ {id:'paintbrush', label:'a paintbrush', cats:['art'], parts:[[0.86,0.32,-0.1,-0.04,0.06],[-0.1,-0.04,-0.34,-0.13,0.09],[-0.34,-0.13,-0.66,-0.24,0.12],[-0.66,-0.24,-0.86,-0.27,0.06],
+   [-0.78,0.16,-0.78,0.16,0.075],[-0.58,0.38,-0.58,0.38,0.065]], eyes:[]}
+);
+(function(){
+  /* rainbow: two concentric arcs resting on little clouds */
+  var p = [], i, a0, a1, rr;
+  for (var b = 0; b < 2; b++){
+    rr = b ? 0.44 : 0.72;
+    for (i = 0; i < 8; i++){
+      a0 = 3.1416 + i / 8 * 3.1416; a1 = 3.1416 + (i + 1) / 8 * 3.1416;
+      p.push([Math.cos(a0) * rr, Math.sin(a0) * rr + 0.3, Math.cos(a1) * rr, Math.sin(a1) * rr + 0.3, 0.09]);
+    }
+  }
+  p.push([-0.6,0.36,-0.6,0.36,0.17],[0.6,0.36,0.6,0.36,0.17]);
+  SH.push({id:'rainbow', label:'a rainbow', cats:['art','geo'], sym:1, parts:p, eyes:[]});
+})();
+for (si = 0; si < SH.length; si++){ if (!SH[si].lv) SH[si].lv = 4; SH[si].idx = si; }
 function pickShape(){
   var all = [], fresh = [];
   for (var i = 0; i < SH.length; i++){ if (SH[i].lv <= level) all.push(SH[i]); if (SH[i].lv === level) fresh.push(SH[i]); }
@@ -796,7 +849,12 @@ var CATS = [
  {k:'sea', q:'Something from a paper ocean is floating by.', lv:3},
  {k:'dance', q:'Something up there is full of rhythm. Can you feel it?', lv:3},
  {k:'room', q:'Something from a bright red room has floated outside.', lv:3},
- {k:'tropic', q:'Something from a sunny island is drifting past.', lv:3}
+ {k:'tropic', q:'Something from a sunny island is drifting past.', lv:3},
+ {k:'music', q:'Listen... something up there is making music.', lv:4},
+ {k:'geo', q:'Look for something made of simple shapes.', lv:4},
+ {k:'rider', q:'A blue rider is galloping across the sky.', lv:4},
+ {k:'moscow', q:'Something from old Moscow has golden domes and bells.', lv:4},
+ {k:'art', q:'Something a painter would love is floating by.', lv:4}
 ];
 var cur = null, nextPrompt = 9, lastCat = '', promptFadeT = 0;
 var promptEl = DOC.getElementById('prompt');
@@ -1130,9 +1188,9 @@ function drawShapeInk(c, sh, ox){
     var la2 = Math.min(1, (lt - 0.6) / 0.8) * fade;
     var ly = Math.max(H * 0.12 + 30, cy - S * 1.02 - 6), lx = clamp(cx, 70, W - 70);
     c.globalAlpha = la2; c.font = '24px ' + FONT; c.textAlign = 'center'; c.textBaseline = 'bottom';
-    c.fillStyle = 'rgba(7,6,13,0.55)'; c.fillText(sh.def.label, lx + 1, ly + 2);
+    c.fillStyle = LIGHT ? 'rgba(255,250,235,0.75)' : 'rgba(7,6,13,0.55)'; c.fillText(sh.def.label, lx + 1, ly + 2);
     c.fillStyle = PEN; c.fillText(sh.def.label, lx, ly);
-    if (sh.firstFind){ c.font = '17px ' + FONT; c.fillStyle = '#ecc768'; c.fillText('new for your journal', lx, ly + 22); }
+    if (sh.firstFind){ c.font = '17px ' + FONT; c.fillStyle = LIGHT ? '#a8640f' : '#ecc768'; c.fillText('new for your journal', lx, ly + 22); }
   }
 }
 function drawInk(){
@@ -1159,9 +1217,10 @@ var FS = [
 'varying vec2 vUv;',
 'uniform sampler2D uPig;uniform sampler2D uNoise;',
 'uniform float uAsp;uniform float uT;uniform float uGy;uniform vec2 uHalf;',
-'uniform vec3 uC0;uniform vec3 uC1;uniform vec3 uC2;uniform vec3 uC3;uniform vec3 uB0;uniform vec3 uB1;uniform vec3 uB2;uniform vec3 uLum;uniform float uVG;uniform float uMT;',
+'uniform vec3 uC0;uniform vec3 uC1;uniform vec3 uC2;uniform vec3 uC3;uniform vec3 uB0;uniform vec3 uB1;uniform vec3 uB2;uniform vec3 uLum;uniform float uVG;uniform float uMT;uniform float uKD;',
 'float h21(vec2 q){return fract(sin(dot(q,vec2(127.1,311.7)))*43758.5453);}',
 'float sum4(vec4 v){return v.r+v.g+v.b+v.a;}',
+'float sg(vec2 q,vec2 a,vec2 b){vec2 pa=q-a;vec2 ba=b-a;float h=clamp(dot(pa,ba)/dot(ba,ba),0.0,1.0);return length(pa-ba*h);}',
 'void main(){',
 ' vec2 uv=vec2(vUv.x,1.0-vUv.y);',
 ' vec2 p=vec2(uv.x,uv.y*uAsp);',
@@ -1243,15 +1302,51 @@ var FS = [
 '  bgM*=1.0-shd*0.35;',
 '  bg=mix(bg,bgM,uMT);col=mix(col,flatc,uMT);a=mix(a,ac,uMT);',
 ' }',
+' if(uKD>0.001){',
+/* clouds become a faceted mosaic: each triangle takes the color found at its centre */
+'  vec2 kq=vec2(uv.x,uv.y*uAsp);float K=18.0;',
+'  vec2 st=vec2(kq.x-kq.y*0.57735,kq.y*1.1547)*K;vec2 tc=floor(st);vec2 tf=fract(st);float up=step(1.0,tf.x+tf.y);',
+'  vec2 cs=tc+mix(vec2(0.3333),vec2(0.6667),up);float cy=cs.y/(1.1547*K);vec2 cq=vec2(cs.x/K+cy*0.57735,cy);',
+'  vec4 Pt=texture2D(uPig,vec2(cq.x,(cq.y/uAsp)*uGy)+uHalf)*1.275;float st4=sum4(Pt);',
+'  vec4 Tn=Pt/max(max(max(Pt.r,Pt.g),max(Pt.b,Pt.a)),0.0001);vec4 T=Tn*Tn;T=T*T;T=T*T;',
+'  vec3 tcol=(T.r*uC0+T.g*uC1+T.b*uC2+T.a*uC3)/max(sum4(T),0.0001);',
+'  float th=h21(tc*1.7+up*3.1);tcol*=0.84+0.28*th;',
+'  float ed=min(min(tf.x,tf.y),abs(1.0-tf.x-tf.y));',
+'  tcol*=1.0-0.6*smoothstep(0.07,0.025,ed);',
+'  float at=step(0.24,st4)*(0.86+0.1*th);',
+/* the canvas: cream ground, a great ringed circle, scattered circles, long lines, a checkerboard, a triangle */
+'  vec3 INK=vec3(0.08,0.07,0.1);',
+'  vec3 bgK=mix(uB0,uB1,smoothstep(0.3,0.8,bn));bgK=mix(bgK,uB2,(1.0-smoothstep(0.0,0.5,uv.y))*0.45);',
+'  float pul=0.008*sin(uT*0.9);vec2 c1=vec2(0.27,0.2);float d1=length(kq-c1);',
+'  bgK=mix(bgK,uC2,smoothstep(0.22+pul,0.15+pul,d1)*0.5);',
+'  bgK=mix(bgK,uC0*0.85,smoothstep(0.125,0.115,d1));',
+'  bgK=mix(bgK,INK,smoothstep(0.012,0.004,abs(d1-0.125)));',
+'  vec2 cp=kq*4.0;vec2 cc2=floor(cp);vec2 cfc=fract(cp)-0.5;float hc=h21(cc2+11.0);',
+'  vec2 cco=(vec2(h21(cc2+2.0),h21(cc2+5.0))-0.5)*0.36;float dc=length(cfc-cco);float rc=(0.06+0.1*h21(cc2+9.0))*(1.0+0.06*sin(uT*1.3+hc*30.0));',
+'  vec3 ccol=hc<0.45?uC3:(hc<0.65?uC1:(hc<0.85?uC0:uC2));float onc=step(0.58,h21(cc2+4.0));',
+'  bgK=mix(bgK,ccol,onc*smoothstep(rc,rc-0.012,dc)*0.85);',
+'  bgK=mix(bgK,INK,onc*smoothstep(0.012,0.0,abs(dc-rc))*0.85);',
+'  float ln=min(min(sg(kq,vec2(-0.1,0.25*uAsp),vec2(1.1,0.75*uAsp)),sg(kq,vec2(0.15,1.05*uAsp),vec2(0.85,0.05*uAsp))),',
+'           min(sg(kq,vec2(0.62,0.0),vec2(0.7,uAsp)),sg(kq,vec2(-0.1,0.56*uAsp),vec2(1.1,0.47*uAsp))));',
+'  bgK=mix(bgK,INK,smoothstep(0.0045,0.0015,ln)*0.85);',
+'  vec2 cb=kq-vec2(0.74,0.8*uAsp);float inb=step(abs(cb.x),0.085)*step(abs(cb.y),0.085);',
+'  float chk=mod(floor(cb.x*47.0)+floor(cb.y*47.0),2.0);',
+'  bgK=mix(bgK,mix(INK,vec3(0.97,0.95,0.9),chk),inb*0.85);',
+'  vec2 tq=kq-vec2(0.22,0.64*uAsp);vec2 t2=vec2(abs(tq.x),-tq.y);float tri=max(t2.x*0.866+t2.y*0.5,-t2.y)-0.06;',
+'  bgK=mix(bgK,uC3,smoothstep(0.003,0.0,tri)*0.85);',
+'  bgK=mix(bgK,INK,smoothstep(0.005,0.0015,abs(tri))*0.85);',
+'  bgK*=0.975+0.04*gr;',
+'  bg=mix(bg,bgK,uKD);col=mix(col,tcol,uKD);a=mix(a,at,uKD);',
+' }',
 ' vec3 o=mix(bg,col,a*0.95);',
-' float thin=smoothstep(0.0,0.06,s)*(1.0-a)*(1.0-uMT);',
+' float thin=smoothstep(0.0,0.06,s)*(1.0-a)*(1.0-max(uMT,uKD));',
 ' o=mix(o,bg*0.55+cc*0.3,thin*0.55);',
 ' float pa=texture2D(uNoise,p*8.0+vec2(0.37,0.11)).g;',
-' o*=0.9+0.13*pa;',
+' o*=mix(0.9+0.13*pa,0.975+0.04*pa,uKD);',
 ' float sp=texture2D(uNoise,p*4.2+vec2(0.71,0.29)).a;',
 ' o=mix(o,vec3(0.92,0.9,0.97),smoothstep(0.955,0.985,sp)*0.4);',
 ' vec2 q=uv-0.5;q*=vec2(1.1,0.75);',
-' o*=1.0-0.45*dot(q,q);',
+' o*=1.0-0.45*dot(q,q)*(1.0-0.6*uKD);',
 ' gl_FragColor=vec4(o,1.0);',
 '}'].join('\n');
 
@@ -1289,7 +1384,7 @@ function initGL(){
   var buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
   var al = gl.getAttribLocation(prog, 'a'); gl.enableVertexAttribArray(al); gl.vertexAttribPointer(al, 2, gl.FLOAT, false, 0, 0);
-  var names = ['uPig','uNoise','uAsp','uT','uGy','uHalf','uC0','uC1','uC2','uC3','uB0','uB1','uB2','uLum','uVG','uMT'], i;
+  var names = ['uPig','uNoise','uAsp','uT','uGy','uHalf','uC0','uC1','uC2','uC3','uB0','uB1','uB2','uLum','uVG','uMT','uKD'], i;
   for (i = 0; i < names.length; i++) U[names[i]] = gl.getUniformLocation(prog, names[i]);
   var NS = 256, r = tileNoise(NS, 8, 11), g = tileNoise(NS, 16, 23), b = tileNoise(NS, 32, 37), a = tileNoise(NS, 64, 51), nd = new Uint8Array(NS * NS * 4);
   for (i = 0; i < NS * NS; i++){ nd[i*4] = r[i] * 255; nd[i*4+1] = g[i] * 255; nd[i*4+2] = b[i] * 255; nd[i*4+3] = a[i] * 255; }
@@ -1320,7 +1415,7 @@ function render(){
     gl.uniform2f(U.uHalf, 0.5 / NX, 0.5 / NY);
     gl.uniform3fv(U.uC0, vis.pal[0]); gl.uniform3fv(U.uC1, vis.pal[1]); gl.uniform3fv(U.uC2, vis.pal[2]); gl.uniform3fv(U.uC3, vis.pal[3]);
     gl.uniform3fv(U.uB0, vis.bg[0]); gl.uniform3fv(U.uB1, vis.bg[1]); gl.uniform3fv(U.uB2, vis.bg[2]);
-    gl.uniform3fv(U.uLum, vis.lum); gl.uniform1f(U.uVG, vis.vg); gl.uniform1f(U.uMT, vis.mt);
+    gl.uniform3fv(U.uLum, vis.lum); gl.uniform1f(U.uVG, vis.vg); gl.uniform1f(U.uMT, vis.mt); gl.uniform1f(U.uKD, vis.kd);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   } else if (fallback){
     var img = fallback.img, px = img.data, cols = [], b0 = vis.bg[0];
@@ -1661,7 +1756,7 @@ function drawCard(cv, def, have){
   if (have){
     var ol = getOutline(def), sc2 = w * 0.36;
     c.save(); c.translate(w / 2, h * 0.5); c.scale(sc2, sc2);
-    c.strokeStyle = PEN; c.lineWidth = 1.7 * k / sc2;
+    c.strokeStyle = CARDPEN; c.lineWidth = 1.7 * k / sc2;
     for (i = 0; i < ol.length; i++){
       var run = ol[i]; c.beginPath(); c.moveTo(run[0], run[1]);
       for (var q = 1; q < run.length / 2; q++) c.lineTo(run[q * 2], run[q * 2 + 1]);
@@ -1670,12 +1765,12 @@ function drawCard(cv, def, have){
     c.restore();
     for (i = 0; i < def.eyes.length; i++){
       var e = def.eyes[i], ex = w / 2 + e[0] * sc2, ey = h * 0.5 + e[1] * sc2, er = Math.max(2.5 * k, e[2] * sc2);
-      if (!def.goldEye){ c.globalAlpha = 1; c.fillStyle = '#07060d'; c.strokeStyle = PEN; c.lineWidth = 1.2 * k; c.beginPath(); CE(c, ex, ey, er * 1.25, er, 0); c.fill(); c.stroke(); }
+      if (!def.goldEye){ c.globalAlpha = 1; c.fillStyle = '#07060d'; c.strokeStyle = CARDPEN; c.lineWidth = 1.2 * k; c.beginPath(); CE(c, ex, ey, er * 1.25, er, 0); c.fill(); c.stroke(); }
       goldDab(c, ex, ey, er * (def.goldEye ? 0.9 : 0.6), i + 3, 1);
     }
     c.globalAlpha = 1;
   } else {
-    c.globalAlpha = 0.35; c.strokeStyle = PEN; c.lineWidth = 1.4 * k;
+    c.globalAlpha = 0.35; c.strokeStyle = CARDPEN; c.lineWidth = 1.4 * k;
     if (c.setLineDash) c.setLineDash([3 * k, 5 * k]);
     c.beginPath(); c.arc(w / 2, h * 0.48, w * 0.22, 0, 6.2832); c.stroke();
     if (c.setLineDash) c.setLineDash([]);
@@ -1766,7 +1861,7 @@ window.addEventListener('orientationchange', function(){ setTimeout(resize, 300)
 DOC.addEventListener('visibilitychange', function(){ if (!AC) return; if (DOC.hidden){ if (AC.suspend) AC.suspend(); } else if (AC.resume) AC.resume(); });
 
 loadSave();
-vis = cpCfg(LV()); setLvLine();
+vis = cpCfg(LV()); setLvLine(); applyPen();
 resize();
 if (!initGL()) initFallback();
 seedSky();
